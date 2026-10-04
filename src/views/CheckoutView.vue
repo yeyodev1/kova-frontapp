@@ -24,6 +24,7 @@ const {
   loadingCities,
   method,
   selectMethod,
+  transferBank,
   quote,
   quoting,
   total,
@@ -75,6 +76,7 @@ const {
           @input="liveValidate"
         />
         <PaymentMethodPicker
+          v-model:bank="transferBank"
           :model-value="method"
           :quote="quote"
           :disabled="!!payphone || processing"
