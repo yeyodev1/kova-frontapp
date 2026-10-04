@@ -11,9 +11,12 @@ defineProps<{ order: Order }>()
     <h2 class="oi__title">{{ orderCopy.summary }}</h2>
     <ul class="oi__items">
       <li v-for="item in order.items" :key="`${item.product}-${item.variantId}`" class="oi__item">
-        <img v-if="item.image" :src="item.image" :alt="item.title" width="52" height="52" loading="lazy" />
+        <span class="oi__media">
+          <img v-if="item.image" :src="item.image" :alt="item.title" width="56" height="56" loading="lazy" />
+          <i v-else class="fa-solid fa-box" aria-hidden="true"></i>
+        </span>
         <span class="oi__name">
-          {{ item.quantity }} × {{ item.title }}
+          <span class="oi__qty">{{ item.quantity }} ×</span> {{ item.title }}
           <small v-if="item.variantName">{{ item.variantName }}</small>
         </span>
         <strong>{{ formatCents(item.total) }}</strong>
@@ -47,51 +50,68 @@ defineProps<{ order: Order }>()
 <style scoped lang="scss">
 .oi {
   @include card;
-  padding: 1.1rem;
+  border-radius: $radius-md;
+  padding: 1.25rem 1.1rem;
 
   &__title {
-    font-size: $text-lg;
-    font-weight: 600;
-    margin-bottom: 0.8rem;
+    @include display($text-xl, 760, 112%);
+    margin-bottom: 1rem;
   }
 
   &__items {
     list-style: none;
-    @include flex(column, stretch, flex-start, 0.7rem);
+    @include flex(column, stretch, flex-start, 0.8rem);
   }
 
   &__item {
-    @include flex(row, center, flex-start, 0.7rem);
+    @include flex(row, center, flex-start, 0.8rem);
     font-size: $text-sm;
 
-    img {
-      width: 3.25rem;
-      height: 3.25rem;
-      border-radius: $radius-sm;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
     strong {
+      @include price($text-base, 700);
       white-space: nowrap;
+    }
+  }
+
+  &__media {
+    @include plinth(12px);
+    @include flex(row, center, center);
+    flex-shrink: 0;
+    width: 3.5rem;
+    height: 3.5rem;
+    color: $alu-dark;
+
+    img {
+      width: 86%;
+      height: 86%;
+      object-fit: contain;
     }
   }
 
   &__name {
     flex: 1;
     min-width: 0;
+    font-weight: 600;
+    line-height: 1.35;
 
     small {
       display: block;
+      font-weight: 400;
       color: $ink-muted;
     }
   }
 
+  &__qty {
+    font-family: $font-mono;
+    font-size: $text-xs;
+    color: $accent;
+  }
+
   &__totals {
-    margin-top: 1rem;
-    padding-top: 0.9rem;
-    border-top: 1px solid $line;
-    @include flex(column, stretch, flex-start, 0.4rem);
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed $alu;
+    @include flex(column, stretch, flex-start, 0.45rem);
     font-size: $text-sm;
 
     div {
@@ -101,14 +121,26 @@ defineProps<{ order: Order }>()
     dt {
       color: $ink-soft;
     }
+
+    dd {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
   }
 
   &__grand {
-    font-size: $text-lg;
-    font-weight: 600;
+    margin-top: 0.35rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid $line;
+
+    dt {
+      color: $ink !important;
+      font-weight: 700;
+      font-size: $text-base;
+    }
 
     dd {
-      font-family: $font-display;
+      @include price($text-xl, 850);
     }
   }
 }
