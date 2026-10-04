@@ -21,5 +21,7 @@ export const adminNav: AdminNavItem[] = [
   { to: '/admin/dropi', name: 'AdminDropi', label: 'Importar de Dropi', short: 'Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
   { to: '/admin/bot', name: 'AdminBot', label: 'Bot de WhatsApp', short: 'Bot', icon: 'fa-brands fa-whatsapp' },
   { to: '/admin/carritos', name: 'AdminLeads', label: 'Carritos abandonados', short: 'Carritos', icon: 'fa-solid fa-cart-arrow-down' },
+  { to: '/admin/incidencias', name: 'AdminIncidents', label: 'Incidencias', short: 'Incidencias', icon: 'fa-solid fa-triangle-exclamation' },
+  { to: '/admin/pagos', name: 'AdminPayments', label: 'Pagos y bancos', short: 'Pagos', icon: 'fa-solid fa-building-columns' },
   { to: '/admin/ajustes', name: 'AdminSettings', label: 'Ajustes', short: 'Ajustes', icon: 'fa-solid fa-sliders' },
 ]
