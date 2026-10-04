@@ -11,11 +11,26 @@ import ProductPricingForm from '@/components/admin/ProductPricingForm.vue'
 import ProductOffersEditor from '@/components/admin/ProductOffersEditor.vue'
 import ProductFaqsEditor from '@/components/admin/ProductFaqsEditor.vue'
 import ProductImagesEditor from '@/components/admin/ProductImagesEditor.vue'
+import ProductDropiLink from '@/components/admin/ProductDropiLink.vue'
+import ProductCardPreview from '@/components/admin/ProductCardPreview.vue'
 import { useProductEditor } from '@/composables/admin/useProductEditor'
-import { formatDateTime } from '@/composables/admin/format'
 
-const { product, form, loading, loadError, saving, uploading, errors, cost, margin, belowCost, load, save, uploadImage } =
-  useProductEditor()
+const {
+  product,
+  form,
+  loading,
+  loadError,
+  saving,
+  justSaved,
+  uploading,
+  errors,
+  cost,
+  margin,
+  belowCost,
+  load,
+  save,
+  uploadImage,
+} = useProductEditor()
 </script>
 
 <template>
@@ -30,7 +45,7 @@ const { product, form, loading, loadError, saving, uploading, errors, cost, marg
     <form v-else class="edit__form" @submit.prevent="save">
       <AdminPageHead
         :title="form.title || 'Producto'"
-        :subtitle="product.dropiId ? `Dropi #${product.dropiId}${product.lastSyncedAt ? ' · sincronizado ' + formatDateTime(product.lastSyncedAt) : ''}` : undefined"
+        :subtitle="product.dropiId ? `Dropi #${product.dropiId}` : 'Producto creado a mano'"
         back="/admin/productos"
       >
         <AdminButton v-if="product.isPublished" :href="`/producto/${product.slug}`" icon="fa-solid fa-arrow-up-right-from-square">
@@ -46,6 +61,9 @@ const { product, form, loading, loadError, saving, uploading, errors, cost, marg
           <ProductFaqsEditor :faqs="form.faqs" />
         </div>
         <div class="edit__col">
+          <AdminPanel>
+            <ProductCardPreview :form="form" :stock="product.stock" />
+          </AdminPanel>
           <AdminPanel title="Visibilidad" icon="fa-regular fa-eye">
             <div class="edit__toggles">
               <AdminToggle v-model="form.isPublished" label="Publicado en la tienda" />
@@ -59,6 +77,7 @@ const { product, form, loading, loadError, saving, uploading, errors, cost, marg
             :margin="margin"
             :below-cost="belowCost"
           />
+          <ProductDropiLink :form="form" :last-synced-at="product.lastSyncedAt" />
           <ProductOffersEditor :offers="form.offers" :base-price="form.price" />
         </div>
       </div>
@@ -69,6 +88,9 @@ const { product, form, loading, loadError, saving, uploading, errors, cost, marg
 
       <div class="edit__bar">
         <p v-if="belowCost" class="edit__warn"><i class="fa-solid fa-triangle-exclamation"></i> Precio bajo el costo</p>
+        <Transition name="saved">
+          <p v-if="justSaved" class="edit__saved" role="status"><i class="fa-solid fa-circle-check"></i> Guardado</p>
+        </Transition>
         <AdminButton type="submit" variant="primary" icon="fa-solid fa-floppy-disk" :loading="saving">
           Guardar cambios
         </AdminButton>
@@ -133,11 +155,34 @@ const { product, form, loading, loadError, saving, uploading, errors, cost, marg
     }
   }
 
+  &__saved {
+    @include flex(row, center, flex-start, 0.35rem);
+    font-size: $text-sm;
+    font-weight: 600;
+    color: $success;
+
+    i {
+      animation: pop 0.45s $ease-spring;
+    }
+  }
+
   &__warn {
     margin-right: auto;
     font-size: $text-xs;
     font-weight: 600;
     color: $danger;
   }
+}
+
+.saved-enter-active,
+.saved-leave-active {
+  transition:
+    opacity $dur $ease-out,
+    transform $dur $ease-out;
+}
+.saved-enter-from,
+.saved-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
 }
 </style>
