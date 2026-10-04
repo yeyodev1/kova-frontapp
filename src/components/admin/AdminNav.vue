@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router'
 import { adminNav, type AdminNavItem } from './adminNav'
 
-defineProps<{ badge: number; variant: 'side' | 'bottom' }>()
+defineProps<{ badges: Partial<Record<NonNullable<AdminNavItem['badge']>, number>>; variant: 'side' | 'bottom' }>()
 
 const route = useRoute()
 
@@ -26,7 +26,9 @@ function isActive(item: AdminNavItem) {
       <span class="nav__pill" aria-hidden="true"></span>
       <span class="nav__icon">
         <i :class="item.icon"></i>
-        <span v-if="item.badge && badge > 0" class="nav__badge">{{ badge > 99 ? '99+' : badge }}</span>
+        <span v-if="item.badge && (badges[item.badge] ?? 0) > 0" class="nav__badge">
+          {{ (badges[item.badge] ?? 0) > 99 ? '99+' : badges[item.badge] }}
+        </span>
       </span>
       <span class="nav__label">{{ variant === 'bottom' ? item.short : item.label }}</span>
     </RouterLink>
