@@ -97,6 +97,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Editar producto' },
       },
       {
+        path: 'dropi/traer',
+        name: 'AdminDropiClip',
+        component: () => import('@/views/admin/AdminDropiClipView.vue'),
+        meta: { title: 'Traer de Dropi' },
+      },
+      {
         path: 'dropi',
         name: 'AdminDropi',
         component: () => import('@/views/admin/AdminDropiView.vue'),
