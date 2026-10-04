@@ -44,10 +44,13 @@ async function submit() {
 
 <template>
   <section class="login">
+    <span class="login__glow" aria-hidden="true"></span>
     <form class="login__card" @submit.prevent="submit">
-      <img src="/logo.jpg" alt="Kova" class="login__logo" width="64" height="64" />
+      <div class="login__plinth">
+        <img src="/logo.jpg" alt="Kova" class="login__logo" width="72" height="72" />
+      </div>
       <p class="login__eyebrow">Panel de administración</p>
-      <h1 class="login__title">Ingresar</h1>
+      <h1 class="login__title">Hola de nuevo</h1>
 
       <div class="login__field">
         <label for="email">Correo</label>
@@ -95,31 +98,67 @@ async function submit() {
 
 <style scoped lang="scss">
 .login {
+  position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   @include flex(column, stretch, center);
   padding: 1.25rem;
-  background: linear-gradient(180deg, $sand 0%, $paper 60%);
+  @include moss;
+  overflow: hidden;
+
+  // Halo salvia detrás de la tarjeta: da profundidad sin otra imagen.
+  &__glow {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    width: 640px;
+    height: 640px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($sage, 0.35), transparent 62%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
 
   &__card {
-    @include card;
+    position: relative;
     @include flex(column, stretch, flex-start, 1rem);
     width: 100%;
-    max-width: 420px;
+    max-width: 410px;
     margin-inline: auto;
-    padding: 2rem 1.4rem;
-    box-shadow: $shadow-md;
+    padding: 2rem 1.4rem 1.6rem;
+    border-radius: $radius-lg;
+    background: $surface;
+    color: $ink;
+    box-shadow:
+      0 1px 0 rgba(#fff, 0.6) inset,
+      0 40px 80px -30px rgba(#000, 0.55);
+    animation: rise $dur-slow $ease-out both;
 
     @include from('sm') {
-      padding: 2.4rem 2.2rem;
+      padding: 2.4rem 2.2rem 1.9rem;
+    }
+  }
+
+  &__plinth {
+    @include plinth(22px);
+    @include glint('&:hover', 1.1s, 0.6);
+    align-self: center;
+    padding: 0.55rem;
+    margin-bottom: 0.3rem;
+    animation: rise $dur-slow $ease-out 80ms both;
+
+    &::after {
+      animation: glint 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.55s forwards;
     }
   }
 
   &__logo {
-    width: 64px;
-    height: 64px;
-    border-radius: 14px;
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
     object-fit: cover;
-    align-self: center;
+    mix-blend-mode: normal !important;
+    box-shadow: 0 6px 16px -8px rgba($ink, 0.45);
   }
 
   &__eyebrow {
@@ -128,9 +167,9 @@ async function submit() {
   }
 
   &__title {
-    @include display($display-sm, 600);
+    @include display(clamp(1.7rem, 1.4rem + 1.4vw, 2.2rem), 800, 118%);
     text-align: center;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
   }
 
   &__password {
@@ -146,8 +185,8 @@ async function submit() {
     right: 0.3rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 2.3rem;
-    height: 2.3rem;
+    width: 2.6rem;
+    height: 2.6rem;
     color: $ink-muted;
   }
 
@@ -162,12 +201,31 @@ async function submit() {
 
   &__submit {
     margin-top: 0.4rem;
+    background: $accent-deep;
+
+    &:hover {
+      background: $ink;
+    }
   }
 
   &__back {
+    @include flex(row, center, center, 0.4rem);
     align-self: center;
     font-size: $text-sm;
     color: $ink-muted;
+    padding: 0.4rem;
+    transition: color $dur $ease-out;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+
+  @include reduced-motion {
+    &__card,
+    &__plinth {
+      animation: none;
+    }
   }
 }
 </style>
