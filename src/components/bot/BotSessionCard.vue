@@ -18,7 +18,7 @@ const isBusy = (action: BotSessionAction) => props.busy === `${action}:${props.s
 </script>
 
 <template>
-  <li class="bsc" :class="{ 'bsc--human': session.humanRequested && !silenced }">
+  <li class="bsc" :class="{ 'bsc--human': session.humanRequested }">
     <header class="bsc__head">
       <div class="bsc__who">
         <p class="bsc__name">{{ session.name || copy.noName }}</p>
@@ -50,7 +50,8 @@ const isBusy = (action: BotSessionAction) => props.busy === `${action}:${props.s
     </div>
 
     <p v-if="session.lastMessage" class="bsc__last">
-      <span class="visually-hidden">{{ copy.lastMessage }}:</span>"{{ session.lastMessage }}"
+      <span class="bsc__role">{{ session.lastMessageRole === 'assistant' ? botAdminCopy.events.bot : botAdminCopy.events.client }}</span>
+      <span class="visually-hidden">{{ copy.lastMessage }}:</span>{{ session.lastMessage }}
     </p>
 
     <div class="bsc__cart">
@@ -62,6 +63,12 @@ const isBusy = (action: BotSessionAction) => props.busy === `${action}:${props.s
         </li>
         <li v-if="session.cart.length > 1" class="bsc__sum">
           <span>{{ copy.cartTotal }}</span><b>{{ formatCents(cartTotal) }}</b>
+        </li>
+      </ul>
+      <ul v-else-if="session.cartSummary">
+        <li>
+          <span>{{ session.cartSummary }}</span>
+          <b>{{ formatCents(session.cartTotal || 0) }}</b>
         </li>
       </ul>
       <p v-else class="bsc__empty">{{ copy.emptyCart }}</p>
@@ -200,6 +207,14 @@ const isBusy = (action: BotSessionAction) => props.busy === `${action}:${props.s
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  &__role {
+    @include eyebrow;
+    margin-right: 0.45rem;
+    font-size: 0.6rem;
+    font-style: normal;
+    color: $ink-muted;
   }
 
   &__cart {
