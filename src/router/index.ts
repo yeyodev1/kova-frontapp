@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { site } from '@/config/site'
+import { pageView } from '@/utils/pixel'
 
 const routes: Array<RouteRecordRaw> = [
+  // ─── Tienda ─────────────────────────────────────────────
   {
     path: '/',
     name: 'Home',
@@ -10,16 +12,109 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: site.name },
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { title: 'Ingresar', guestOnly: true },
+    path: '/tienda',
+    name: 'Catalog',
+    component: () => import('@/views/CatalogView.vue'),
+    meta: { title: 'Tienda' },
   },
   {
-    path: '/cuenta',
-    name: 'Account',
-    component: () => import('@/views/AccountView.vue'),
-    meta: { title: 'Mi cuenta', requiresAuth: true },
+    path: '/producto/:slug',
+    name: 'Product',
+    component: () => import('@/views/ProductView.vue'),
+    meta: { title: 'Producto' },
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('@/views/CheckoutView.vue'),
+    meta: { title: 'Finalizar compra', hideChrome: true },
+  },
+  {
+    path: '/pedido/:number',
+    name: 'OrderSuccess',
+    component: () => import('@/views/OrderSuccessView.vue'),
+    meta: { title: 'Pedido recibido' },
+  },
+  {
+    path: '/pago/respuesta',
+    name: 'PaymentResponse',
+    component: () => import('@/views/PaymentResponseView.vue'),
+    meta: { title: 'Confirmando pago', hideChrome: true },
+  },
+  {
+    path: '/rastrear',
+    name: 'Track',
+    component: () => import('@/views/TrackOrderView.vue'),
+    meta: { title: 'Rastrear pedido' },
+  },
+  {
+    path: '/politicas/:slug',
+    name: 'Policy',
+    component: () => import('@/views/PolicyView.vue'),
+    meta: { title: 'Políticas' },
+  },
+
+  // ─── Admin ──────────────────────────────────────────────
+  {
+    path: '/admin/login',
+    name: 'Login',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { title: 'Ingresar', guestOnly: true, hideChrome: true },
+  },
+  {
+    path: '/admin',
+    component: () => import('@/views/admin/AdminLayout.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true, hideChrome: true },
+    children: [
+      {
+        path: '',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/AdminDashboardView.vue'),
+        meta: { title: 'Panel' },
+      },
+      {
+        path: 'pedidos',
+        name: 'AdminOrders',
+        component: () => import('@/views/admin/AdminOrdersView.vue'),
+        meta: { title: 'Pedidos' },
+      },
+      {
+        path: 'pedidos/:id',
+        name: 'AdminOrderDetail',
+        component: () => import('@/views/admin/AdminOrderDetailView.vue'),
+        meta: { title: 'Pedido' },
+      },
+      {
+        path: 'productos',
+        name: 'AdminProducts',
+        component: () => import('@/views/admin/AdminProductsView.vue'),
+        meta: { title: 'Productos' },
+      },
+      {
+        path: 'productos/:id',
+        name: 'AdminProductEdit',
+        component: () => import('@/views/admin/AdminProductEditView.vue'),
+        meta: { title: 'Editar producto' },
+      },
+      {
+        path: 'dropi',
+        name: 'AdminDropi',
+        component: () => import('@/views/admin/AdminDropiView.vue'),
+        meta: { title: 'Importar de Dropi' },
+      },
+      {
+        path: 'carritos',
+        name: 'AdminLeads',
+        component: () => import('@/views/admin/AdminLeadsView.vue'),
+        meta: { title: 'Carritos abandonados' },
+      },
+      {
+        path: 'ajustes',
+        name: 'AdminSettings',
+        component: () => import('@/views/admin/AdminSettingsView.vue'),
+        meta: { title: 'Ajustes' },
+      },
+    ],
   },
   {
     path: '/:pathMatch(.*)*',
@@ -53,14 +148,19 @@ router.beforeEach(async (to) => {
     return { name: 'Login', query: { next: to.fullPath }, replace: true }
   }
 
+  if (to.meta.requiresAdmin && !userStore.isAdmin) {
+    return { name: 'Home', replace: true }
+  }
+
   if (to.meta.guestOnly && userStore.isAuthenticated) {
-    return { name: 'Account', replace: true }
+    return { name: 'AdminDashboard', replace: true }
   }
 })
 
 router.afterEach((to) => {
   const title = to.meta.title as string | undefined
   document.title = title && title !== site.name ? `${title} — ${site.name}` : site.name
+  if (!to.path.startsWith('/admin')) pageView()
 })
 
 export default router
