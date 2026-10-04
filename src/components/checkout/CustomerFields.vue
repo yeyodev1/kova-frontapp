@@ -1,129 +1,110 @@
 <script setup lang="ts">
 import { checkoutCopy } from '@/config/site'
 import FormField from './FormField.vue'
+import CheckoutSection from './CheckoutSection.vue'
 import type { CheckoutField, CheckoutForm } from '@/composables/useCheckoutForm'
 
 // El formulario es el reactive de useCheckoutForm: se edita en sitio.
-defineProps<{ form: CheckoutForm; errors: Partial<Record<CheckoutField, string>>; disabled?: boolean }>()
-const emit = defineEmits<{ blur: [field: CheckoutField] }>()
+defineProps<{
+  form: CheckoutForm
+  errors: Partial<Record<CheckoutField, string>>
+  isValid: (field: CheckoutField) => boolean
+  done?: boolean
+  disabled?: boolean
+}>()
+const emit = defineEmits<{ blur: [field: CheckoutField]; input: [field: CheckoutField] }>()
 
 const f = checkoutCopy.fields
 </script>
 
 <template>
-  <fieldset class="group" :disabled="disabled">
-    <legend class="group__title"><span>1</span> {{ checkoutCopy.contactTitle }}</legend>
-    <p class="group__note">{{ checkoutCopy.noAccount }}</p>
-
-    <div class="group__row group__row--pair">
-      <FormField id="checkout-firstName" :label="f.firstName" :error="errors.firstName">
+  <CheckoutSection :step="1" :title="checkoutCopy.contactTitle" :note="checkoutCopy.noAccount" :done="done" :disabled="disabled">
+    <div class="cf__row cf__row--pair">
+      <FormField id="checkout-firstName" :label="f.firstName" :error="errors.firstName" :valid="isValid('firstName')">
         <input
           id="checkout-firstName"
           v-model="form.firstName"
           type="text"
+          name="given-name"
           autocomplete="given-name"
           autocapitalize="words"
           enterkeyhint="next"
-          :aria-invalid="!!errors.firstName"
+          @input="emit('input', 'firstName')"
           @blur="emit('blur', 'firstName')"
         />
       </FormField>
-      <FormField id="checkout-lastName" :label="f.lastName" :error="errors.lastName">
+      <FormField id="checkout-lastName" :label="f.lastName" :error="errors.lastName" :valid="isValid('lastName')">
         <input
           id="checkout-lastName"
           v-model="form.lastName"
           type="text"
+          name="family-name"
           autocomplete="family-name"
           autocapitalize="words"
           enterkeyhint="next"
-          :aria-invalid="!!errors.lastName"
+          @input="emit('input', 'lastName')"
           @blur="emit('blur', 'lastName')"
         />
       </FormField>
     </div>
 
-    <FormField id="checkout-phone" :label="f.phone" :error="errors.phone" :hint="f.phoneHint">
+    <FormField id="checkout-phone" :label="f.phone" :error="errors.phone" :hint="f.phoneHint" :valid="isValid('phone')">
       <input
         id="checkout-phone"
         v-model="form.phone"
         type="tel"
+        name="tel"
         inputmode="tel"
         autocomplete="tel-national"
         maxlength="16"
         enterkeyhint="next"
         :placeholder="f.phonePlaceholder"
-        :aria-invalid="!!errors.phone"
-        aria-describedby="checkout-phone-hint"
+        @input="emit('input', 'phone')"
         @blur="emit('blur', 'phone')"
       />
     </FormField>
 
-    <div class="group__row">
-      <FormField id="checkout-idNumber" :label="f.idNumber" :error="errors.idNumber">
+    <div class="cf__row">
+      <FormField id="checkout-email" :label="f.email" :error="errors.email" :hint="f.emailHint" :valid="isValid('email')">
+        <input
+          id="checkout-email"
+          v-model="form.email"
+          type="email"
+          name="email"
+          inputmode="email"
+          autocomplete="email"
+          autocapitalize="off"
+          spellcheck="false"
+          enterkeyhint="next"
+          @input="emit('input', 'email')"
+          @blur="emit('blur', 'email')"
+        />
+      </FormField>
+      <FormField id="checkout-idNumber" :label="f.idNumber" :error="errors.idNumber" :valid="isValid('idNumber')">
         <input
           id="checkout-idNumber"
           v-model="form.idNumber"
           type="text"
           inputmode="numeric"
+          pattern="[0-9]*"
           maxlength="13"
           autocomplete="off"
-          :aria-invalid="!!errors.idNumber"
+          enterkeyhint="next"
+          @input="emit('input', 'idNumber')"
           @blur="emit('blur', 'idNumber')"
         />
       </FormField>
-      <FormField id="checkout-email" :label="f.email" :error="errors.email" :hint="f.emailHint">
-        <input
-          id="checkout-email"
-          v-model="form.email"
-          type="email"
-          inputmode="email"
-          autocomplete="email"
-          autocapitalize="off"
-          :aria-invalid="!!errors.email"
-          @blur="emit('blur', 'email')"
-        />
-      </FormField>
     </div>
-  </fieldset>
+  </CheckoutSection>
 </template>
 
 <style scoped lang="scss">
-.group {
-  border: none;
-  @include flex(column, stretch, flex-start, 0.9rem);
-  min-width: 0;
+.cf__row {
+  @include flex-cards(220px, 1rem);
 
-  &__title {
-    @include flex(row, center, flex-start, 0.6rem);
-    font-family: $font-display;
-    font-size: $text-xl;
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-
-    span {
-      @include flex(row, center, center);
-      width: 1.75rem;
-      height: 1.75rem;
-      border-radius: 50%;
-      background: $accent;
-      color: $surface;
-      font-size: $text-sm;
-    }
-  }
-
-  &__note {
-    font-size: $text-sm;
-    color: $ink-muted;
-    margin-top: -0.5rem;
-  }
-
-  &__row {
-    @include flex-cards(220px, 0.9rem);
-
-    // Nombre y apellido caben lado a lado incluso a 360px.
-    &--pair > * {
-      flex-basis: 130px;
-    }
+  // Nombre y apellido caben lado a lado incluso a 360px.
+  &--pair > * {
+    flex-basis: 130px;
   }
 }
 </style>
