@@ -28,7 +28,7 @@ const byStatus = computed(() => {
 const shortcuts = [
   { to: '/admin/productos/nuevo', label: 'Subir producto', icon: 'fa-solid fa-camera' },
   { to: '/admin/pedidos?status=transfer_review', label: 'Revisar transferencias', icon: 'fa-solid fa-building-columns' },
-  { to: '/admin/pedidos', label: 'Ver pedidos', icon: 'fa-solid fa-receipt' },
+  { to: '/admin/pedidos?status=all', label: 'Ver pedidos', icon: 'fa-solid fa-receipt' },
   { to: '/admin/carritos', label: 'Recuperar carritos', icon: 'fa-brands fa-whatsapp' },
   { to: '/admin/dropi', label: 'Importar de Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
   { to: '/admin/ajustes', label: 'Ajustes', icon: 'fa-solid fa-sliders' },
@@ -50,11 +50,21 @@ const shortcuts = [
 
     <template v-else-if="stats">
       <div class="dash__stats">
-        <AdminStatCard class="dash__stat" style="--i: 0" label="Pedidos hoy" :value="stats.ordersToday" icon="fa-solid fa-receipt" />
-        <AdminStatCard class="dash__stat" style="--i: 1" label="Ventas hoy" :value="formatCents(stats.revenueToday)" icon="fa-solid fa-dollar-sign" tone="success" />
+        <AdminStatCard
+          class="dash__stat dash__stat--todo"
+          style="--i: 0"
+          label="Por gestionar"
+          :value="stats.todoCount ?? 0"
+          icon="fa-solid fa-list-check"
+          :tone="stats.todoCount ? 'warning' : 'success'"
+          :hint="stats.todoCount ? 'Pasar a Dropi, revisar comprobantes y pedir guías' : 'Todo al día'"
+          to="/admin/pedidos"
+        />
+        <AdminStatCard class="dash__stat" style="--i: 1" label="Pedidos hoy" :value="stats.ordersToday" icon="fa-solid fa-receipt" />
+        <AdminStatCard class="dash__stat" style="--i: 2" label="Ventas hoy" :value="formatCents(stats.revenueToday)" icon="fa-solid fa-dollar-sign" tone="success" />
         <AdminStatCard
           class="dash__stat"
-          style="--i: 2"
+          style="--i: 3"
           label="Transferencias por revisar"
           :value="stats.pendingTransfers"
           icon="fa-solid fa-building-columns"
@@ -63,7 +73,7 @@ const shortcuts = [
         />
         <AdminStatCard
           class="dash__stat"
-          style="--i: 3"
+          style="--i: 4"
           label="Errores de Dropi"
           :value="stats.dropiErrors"
           icon="fa-solid fa-triangle-exclamation"
@@ -119,6 +129,15 @@ const shortcuts = [
   &__stat {
     animation: rise $dur-slow $ease-out both;
     animation-delay: calc(var(--i) * 70ms);
+
+    // Lo primero que hay que mirar al entrar: ocupa la fila entera en el celular.
+    &--todo {
+      flex-basis: 100%;
+
+      @include from('lg') {
+        flex-basis: 200px;
+      }
+    }
   }
 
   &__row {
