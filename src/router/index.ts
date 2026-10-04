@@ -110,6 +110,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Productos' },
       },
       {
+        path: 'productos/nuevo',
+        name: 'AdminProductUpload',
+        component: () => import('@/views/admin/AdminProductUploadView.vue'),
+        meta: { title: 'Subir producto' },
+      },
+      {
         path: 'productos/:id',
         name: 'AdminProductEdit',
         component: () => import('@/views/admin/AdminProductEditView.vue'),
