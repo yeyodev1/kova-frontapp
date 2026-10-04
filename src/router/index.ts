@@ -63,10 +63,15 @@ const routes: Array<RouteRecordRaw> = [
 
   // ─── Admin ──────────────────────────────────────────────
   {
-    path: '/admin/login',
+    // Acceso del personal: kovashopper.com/login.
+    path: '/login',
     name: 'Login',
     component: () => import('@/views/LoginView.vue'),
     meta: { title: 'Ingresar', guestOnly: true, hideChrome: true },
+  },
+  {
+    path: '/admin/login',
+    redirect: (to) => ({ path: '/login', query: to.query }),
   },
   {
     path: '/admin',
