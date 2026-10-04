@@ -32,6 +32,7 @@ const copy = botAdminCopy.events
       <summary>
         <span class="ber__who">{{ copy.client }}</span>
         <span class="ber__preview">{{ event.message || copy.noMessage }}</span>
+        <i class="fa-solid fa-chevron-down ber__chev" aria-hidden="true"></i>
       </summary>
       <p class="ber__text">{{ event.message || copy.noMessage }}</p>
     </details>
@@ -39,6 +40,7 @@ const copy = botAdminCopy.events
       <summary>
         <span class="ber__who">{{ copy.bot }}</span>
         <span class="ber__preview">{{ event.reply || copy.noReply }}</span>
+        <i class="fa-solid fa-chevron-down ber__chev" aria-hidden="true"></i>
       </summary>
       <p class="ber__text">{{ event.reply || copy.noReply }}</p>
     </details>
@@ -137,7 +139,11 @@ const copy = botAdminCopy.events
     }
 
     &[open] .ber__preview {
-      display: none;
+      visibility: hidden;
+    }
+
+    &[open] .ber__chev {
+      transform: rotate(180deg);
     }
   }
 
@@ -159,6 +165,13 @@ const copy = botAdminCopy.events
     text-overflow: ellipsis;
     white-space: nowrap;
     color: $ink-soft;
+  }
+
+  &__chev {
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    color: $ink-muted;
+    transition: transform $dur-fast ease;
   }
 
   &__text {
