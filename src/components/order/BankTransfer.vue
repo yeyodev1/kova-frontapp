@@ -5,12 +5,15 @@ import { formatCents } from '@/utils/format'
 import { useStoreSettings } from '@/composables/useStoreSettings'
 import ReceiptUploader from './ReceiptUploader.vue'
 import CopyButton from './CopyButton.vue'
+import BankLogo from '@/components/ui/BankLogo.vue'
 import type { Order } from '@/types'
 
 const props = defineProps<{ order: Order; phone: string }>()
 const emit = defineEmits<{ uploaded: [order: Order] }>()
 
-const { bankAccounts } = useStoreSettings()
+const { bankAccounts: storeAccounts } = useStoreSettings()
+// El pedido trae sus cuentas (la que eligió el cliente, o todas las activas); los ajustes son el respaldo.
+const bankAccounts = computed(() => props.order.bankAccounts?.length ? props.order.bankAccounts : storeAccounts.value)
 // Lo que se copia es el número tal cual lo pide la app del banco: 24.40, sin símbolo.
 const amount = computed(() => (props.order.total / 100).toFixed(2))
 </script>
@@ -19,7 +22,7 @@ const amount = computed(() => (props.order.total / 100).toFixed(2))
   <section class="bt" aria-labelledby="bt-title">
     <header class="bt__head">
       <h2 id="bt-title" class="bt__title">{{ orderCopy.bankTitle }}</h2>
-      <p class="bt__text">{{ orderCopy.bankText }}</p>
+      <p class="bt__text">{{ bankAccounts.length === 1 ? orderCopy.bankTextOne : orderCopy.bankText }}</p>
     </header>
 
     <div class="bt__amount">
@@ -33,7 +36,7 @@ const amount = computed(() => (props.order.total / 100).toFixed(2))
     <ul v-if="bankAccounts.length" class="bt__accounts">
       <li v-for="(account, i) in bankAccounts" :key="account.number" v-reveal="i * 80" class="bt__account">
         <p class="bt__bank">
-          <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+          <BankLogo :src="account.logoUrl" size="2rem" />
           <span>{{ account.bank }}</span>
           <em>{{ account.type }}</em>
         </p>
