@@ -3,12 +3,26 @@ import AdminPanel from './AdminPanel.vue'
 import AdminButton from './AdminButton.vue'
 import type { SyncKind } from '@/composables/admin/useDropi'
 
-defineProps<{ syncing: SyncKind | null; results: Partial<Record<SyncKind, Record<string, unknown> | string>> }>()
+defineProps<{
+  syncing: SyncKind | null
+  disabled?: boolean
+  results: Partial<Record<SyncKind, Record<string, unknown> | string>>
+}>()
 const emit = defineEmits<{ sync: [kind: SyncKind] }>()
 
 const kinds: { kind: SyncKind; label: string; icon: string; hint: string }[] = [
-  { kind: 'products', label: 'Productos', icon: 'fa-solid fa-box', hint: 'Stock y costo de los importados' },
-  { kind: 'locations', label: 'Ubicaciones', icon: 'fa-solid fa-map-location-dot', hint: 'Provincias y ciudades' },
+  {
+    kind: 'products',
+    label: 'Productos',
+    icon: 'fa-solid fa-box',
+    hint: 'Stock y costo de los importados',
+  },
+  {
+    kind: 'locations',
+    label: 'Ubicaciones',
+    icon: 'fa-solid fa-map-location-dot',
+    hint: 'Provincias y ciudades',
+  },
   { kind: 'orders', label: 'Pedidos', icon: 'fa-solid fa-truck', hint: 'Estados y guías' },
 ]
 
@@ -32,7 +46,7 @@ function format(value: unknown): string {
             variant="soft"
             icon="fa-solid fa-arrows-rotate"
             :loading="syncing === k.kind"
-            :disabled="!!syncing"
+            :disabled="!!syncing || disabled"
             @click="emit('sync', k.kind)"
           >
             Sincronizar
