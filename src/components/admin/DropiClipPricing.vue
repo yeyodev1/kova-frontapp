@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { formatCents, dollarsToCents } from '@/utils/money'
 import { marginOf } from '@/composables/admin/margin'
-import type { ClipDraft } from '@/composables/admin/useDropiClip'
+import { pickOnPrice, type ClipDraft } from '@/composables/admin/useDropiClip'
 
 // Dropi dibuja precios y stock en canvas: aquí los escribe el dueño mirando la pantalla de Dropi.
 const props = defineProps<{ item: ClipDraft; sale: number }>()
@@ -18,6 +18,7 @@ const margin = computed(() => marginOf(props.sale, dollarsToCents(props.item.cos
       <input
         v-model.number="item.cost"
         type="number"
+        @input="pickOnPrice(item)"
         min="0"
         step="0.01"
         inputmode="decimal"
@@ -57,6 +58,7 @@ const margin = computed(() => marginOf(props.sale, dollarsToCents(props.item.cos
       <input
         v-model.number="item.price"
         type="number"
+        @input="pickOnPrice(item)"
         min="0"
         step="0.01"
         inputmode="decimal"
