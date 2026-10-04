@@ -15,6 +15,10 @@ const {
   form,
   errors,
   validateField,
+  liveValidate,
+  isValid,
+  stepsDone,
+  currentStep,
   provinces,
   cities,
   loadingCities,
@@ -33,11 +37,13 @@ const {
 
 <template>
   <div class="checkout">
-    <CheckoutHeader />
+    <CheckoutHeader :done="stepsDone" :current="currentStep" />
 
     <div v-if="cart.isEmpty && !payphone" class="checkout__empty">
       <EmptyState icon="fa-solid fa-cart-shopping" :title="checkoutCopy.emptyTitle" :text="checkoutCopy.emptyText">
-        <RouterLink to="/tienda" class="btn btn--cta btn--lg">{{ checkoutCopy.emptyCta }}</RouterLink>
+        <RouterLink to="/tienda" class="btn btn--primary btn--lg">
+          {{ checkoutCopy.emptyCta }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </RouterLink>
       </EmptyState>
     </div>
 
@@ -47,15 +53,26 @@ const {
       </aside>
 
       <form class="checkout__form" novalidate @submit.prevent="submit">
-        <CustomerFields :form="form" :errors="errors" :disabled="!!payphone" @blur="validateField" />
+        <CustomerFields
+          :form="form"
+          :errors="errors"
+          :is-valid="isValid"
+          :done="stepsDone[0]"
+          :disabled="!!payphone"
+          @blur="validateField"
+          @input="liveValidate"
+        />
         <AddressFields
           :form="form"
           :errors="errors"
+          :is-valid="isValid"
           :provinces="provinces"
           :cities="cities"
           :loading-cities="loadingCities"
+          :done="stepsDone[1]"
           :disabled="!!payphone"
           @blur="validateField"
+          @input="liveValidate"
         />
         <PaymentMethodPicker
           :model-value="method"
@@ -79,7 +96,9 @@ const {
 <style scoped lang="scss">
 .checkout {
   flex: 1;
-  background: $paper;
+  background:
+    radial-gradient(80% 40% at 100% 0%, rgba($sage, 0.18), transparent 70%),
+    $paper;
 
   &__empty {
     @include container(640px);
@@ -87,31 +106,35 @@ const {
   }
 
   &__layout {
-    @include container(1040px);
-    @include flex(column, stretch, flex-start, 1.5rem);
+    @include container(1160px);
+    @include flex(column, stretch, flex-start, 1rem);
     // Espacio para la barra fija de confirmar en móvil.
-    padding-block: 1rem 7rem;
+    padding-block: 1rem 8rem;
 
-    @include from('md') {
+    @include from('lg') {
       flex-direction: row-reverse;
       align-items: flex-start;
       gap: 2.5rem;
-      padding-block: 2rem $space-xl;
+      padding-block: 2.25rem $space-xl;
     }
   }
 
   &__aside {
-    @include from('md') {
-      flex: 0 0 360px;
+    @include from('lg') {
+      flex: 0 0 380px;
       position: sticky;
       top: 1.5rem;
     }
   }
 
   &__form {
-    @include flex(column, stretch, flex-start, 2rem);
+    @include flex(column, stretch, flex-start, 1rem);
     flex: 1;
     min-width: 0;
+
+    @include from('lg') {
+      gap: 1.25rem;
+    }
   }
 }
 </style>
