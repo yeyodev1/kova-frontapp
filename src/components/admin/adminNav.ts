@@ -4,7 +4,8 @@ export interface AdminNavItem {
   label: string
   short: string
   icon: string
-  badge?: boolean
+  /** Qué contador muestra (ver useAdminBadges). */
+  badge?: 'orders' | 'incidents'
 }
 
 export const adminNav: AdminNavItem[] = [
@@ -15,13 +16,20 @@ export const adminNav: AdminNavItem[] = [
     label: 'Pedidos',
     short: 'Pedidos',
     icon: 'fa-solid fa-receipt',
-    badge: true,
+    badge: 'orders',
   },
   { to: '/admin/productos', name: 'AdminProducts', label: 'Productos', short: 'Productos', icon: 'fa-solid fa-box' },
   { to: '/admin/dropi', name: 'AdminDropi', label: 'Importar de Dropi', short: 'Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
   { to: '/admin/bot', name: 'AdminBot', label: 'Bot de WhatsApp', short: 'Bot', icon: 'fa-brands fa-whatsapp' },
   { to: '/admin/carritos', name: 'AdminLeads', label: 'Carritos abandonados', short: 'Carritos', icon: 'fa-solid fa-cart-arrow-down' },
-  { to: '/admin/incidencias', name: 'AdminIncidents', label: 'Incidencias', short: 'Incidencias', icon: 'fa-solid fa-triangle-exclamation' },
+  {
+    to: '/admin/incidencias',
+    name: 'AdminIncidents',
+    label: 'Incidencias',
+    short: 'Incidencias',
+    icon: 'fa-solid fa-triangle-exclamation',
+    badge: 'incidents',
+  },
   { to: '/admin/pagos', name: 'AdminPayments', label: 'Pagos y bancos', short: 'Pagos', icon: 'fa-solid fa-building-columns' },
   { to: '/admin/ajustes', name: 'AdminSettings', label: 'Ajustes', short: 'Ajustes', icon: 'fa-solid fa-sliders' },
 ]
