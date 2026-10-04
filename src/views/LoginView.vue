@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
 import type { ApiError } from '@/types'
+import { rememberPasswordStrength } from '@/composables/admin/usePasswordChange'
 
 const route = useRoute()
 const router = useRouter()
@@ -32,6 +33,8 @@ async function submit() {
       error.value = 'Esta cuenta no tiene acceso al panel'
       return
     }
+    // Solo queda un flag en sessionStorage para el aviso del panel; la contraseña no se guarda.
+    rememberPasswordStrength(password.value)
     toast.success(`Hola, ${user.name || user.email}`)
     router.replace(nextPath())
   } catch (e) {
@@ -54,7 +57,14 @@ async function submit() {
 
       <div class="login__field">
         <label for="email">Correo</label>
-        <input id="email" v-model="email" type="email" autocomplete="email" inputmode="email" required />
+        <input
+          id="email"
+          v-model="email"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          required
+        />
       </div>
 
       <div class="login__field">
