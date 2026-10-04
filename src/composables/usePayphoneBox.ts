@@ -44,6 +44,10 @@ export function usePayphoneBox() {
       clientTransactionId: config.clientTransactionId,
       amount: config.amount,
       amountWithoutTax: config.amountWithoutTax,
+      amountWithTax: config.amountWithTax ?? 0,
+      tax: config.tax ?? 0,
+      service: config.service ?? 0,
+      tip: config.tip ?? 0,
       currency: config.currency,
       storeId: config.storeId,
       reference: config.reference,
@@ -53,6 +57,9 @@ export function usePayphoneBox() {
       // Siempre los datos reales del comprador: Payphone bloquea datos quemados.
       email: config.email || undefined,
       phoneNumber: config.phoneNumber || undefined,
+      documentId: config.documentId || undefined,
+      identificationType: config.identificationType || undefined,
+      optionalParameter: config.optionalParameter || undefined,
     }).render(containerId)
   }
 
