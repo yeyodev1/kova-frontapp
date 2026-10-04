@@ -6,6 +6,7 @@ import type {
   CreateOrderResponse,
   Order,
   Paginated,
+  PayOrderResponse,
   PaymentMethod,
   Product,
   ProductDetail,
@@ -82,6 +83,14 @@ class StoreService extends APIBase {
       undefined,
       { timeout: 30000 },
     )
+    return data
+  }
+
+  /** Link de pago del bot: cada llamada abre un intento nuevo en Payphone, no se repite en bucle. */
+  async payOrder(token: string): Promise<PayOrderResponse> {
+    const { data } = await this.get<PayOrderResponse>(`orders/pay/${encodeURIComponent(token)}`, undefined, {
+      timeout: 30000,
+    })
     return data
   }
 
