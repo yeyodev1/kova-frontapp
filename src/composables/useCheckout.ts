@@ -21,7 +21,8 @@ export function useCheckout() {
   const cart = useCartStore()
   const toast = useToastStore()
 
-  const { form, errors, validateField, validate, normalizedPhone, phoneIsValid } = useCheckoutForm()
+  const { form, errors, validateField, liveValidate, isValid, validate, contactDone, addressDone, normalizedPhone, phoneIsValid } =
+    useCheckoutForm()
   const locations = useLocations()
   const method = ref<PaymentMethod>('card')
   const { quote, loading: quoting, error: quoteError } = useQuote(method)
@@ -32,6 +33,13 @@ export function useCheckout() {
   let checkoutTracked = false
 
   const total = computed(() => quote.value?.total || 0)
+
+  // Indicador de pasos: Datos → Envío → Pago, según lo que ya está completo.
+  const stepsDone = computed(() => [contactDone.value, addressDone.value, !!payphone.value])
+  const currentStep = computed(() => {
+    const index = stepsDone.value.findIndex((done) => !done)
+    return index === -1 ? 2 : index
+  })
 
   // InitiateCheckout con el valor real, apenas llega la primera cotización.
   watch(quote, (value) => {
@@ -149,6 +157,10 @@ export function useCheckout() {
     form,
     errors,
     validateField,
+    liveValidate,
+    isValid,
+    stepsDone,
+    currentStep,
     provinces: locations.provinces,
     cities: locations.cities,
     loadingCities: locations.loadingCities,
