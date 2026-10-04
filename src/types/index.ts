@@ -368,12 +368,18 @@ export interface BotSession {
   lastMessageAt: string | null
   lastMessage: string
   humanRequested: boolean
+  /** Cuando el backend manda el carrito resumido en vez de líneas. */
+  cartSummary?: string
+  cartTotal?: number
+  lastMessageRole?: 'user' | 'assistant'
 }
 
 export interface BotEndpoint {
   name: string
   method: string
   url: string
+  /** Para qué sirve el endpoint (opcional). */
+  use?: string
 }
 
 export interface BotFlow {
