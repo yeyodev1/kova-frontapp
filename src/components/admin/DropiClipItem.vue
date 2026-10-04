@@ -16,12 +16,12 @@ const uid = computed(() => props.item.key)
 <template>
   <article
     class="ci"
-    :class="{ 'ci--off': !item.selected, 'ci--warn': item.selected && (idMsg || titleMsg) }"
+    :class="{ 'ci--on': item.selected, 'ci--warn': item.selected && (idMsg || titleMsg) }"
   >
     <header class="ci__top">
       <label class="ci__check">
         <input v-model="item.selected" type="checkbox" />
-        <span>{{ item.selected ? 'Importar' : 'No importar' }}</span>
+        <span>{{ item.selected ? 'Marcado para importar' : 'Marcar para importar' }}</span>
       </label>
       <RouterLink
         v-if="item.linked"
@@ -100,10 +100,11 @@ const uid = computed(() => props.item.key)
   @include card;
   @include flex(column, stretch, flex-start);
   overflow: hidden;
-  @include transition(opacity);
+  @include transition(border-color);
 
-  &--off {
-    opacity: 0.6;
+  &--on {
+    border-color: $accent;
+    box-shadow: 0 0 0 1px $accent;
   }
 
   &--warn {
