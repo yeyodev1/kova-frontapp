@@ -1,4 +1,4 @@
-import type { Order, OrderStatus, PaymentMethod } from '@/types'
+import type { Order, OrderChannel, OrderStatus, OrderTodo, PaymentMethod } from '@/types'
 
 export type Tone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'accent'
 
@@ -67,4 +67,27 @@ export function statusLabel(status: string): string {
 
 export function statusTone(status: string): Tone {
   return statusTones[status as OrderStatus] ?? 'neutral'
+}
+
+export const channelLabels: Record<OrderChannel, string> = {
+  web: 'Web',
+  whatsapp_bot: 'Bot de WhatsApp',
+}
+
+export const channelIcons: Record<OrderChannel, string> = {
+  web: 'fa-solid fa-globe',
+  whatsapp_bot: 'fa-brands fa-whatsapp',
+}
+
+/** Qué hay que hacer con un pedido por gestionar. */
+export const todoLabels: Record<OrderTodo, string> = {
+  dropi: 'Pasar a Dropi',
+  receipt: 'Revisar comprobante',
+  guide: 'Pedir guía',
+}
+
+export const todoIcons: Record<OrderTodo, string> = {
+  dropi: 'fa-solid fa-truck-arrow-right',
+  receipt: 'fa-solid fa-file-invoice-dollar',
+  guide: 'fa-solid fa-barcode',
 }
