@@ -134,6 +134,25 @@ class AdminService extends APIBase {
     return data
   }
 
+  /** Sube una foto antes de crear el producto ("Subir producto"): devuelve su link de Cloudinary. */
+  async uploadImage(file: Blob, onProgress?: (percent: number) => void): Promise<string> {
+    const form = new FormData()
+    form.append('image', file, file instanceof File ? file.name : 'foto.jpg')
+    const { data } = await this.post<{ url: string }>('admin/uploads/image', form, undefined, {
+      timeout: 120000,
+      onUploadProgress: (e) => {
+        if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100))
+      },
+    })
+    return data.url
+  }
+
+  /** Categorías usadas en la tienda, incluidas las de borradores. */
+  async productCategories(): Promise<string[]> {
+    const { data } = await this.get<string[]>('admin/products/categories')
+    return data
+  }
+
   // ─── Órdenes ────────────────────────────────────────────
   async orders(params: {
     status?: string
