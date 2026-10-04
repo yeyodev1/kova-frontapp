@@ -6,5 +6,6 @@ Disallow: /checkout
 Disallow: /pedido/
 Disallow: /pago/
 Disallow: /pay-response
+Disallow: /pagar/
 
 Sitemap: https://kovashopper.com/sitemap.xml
