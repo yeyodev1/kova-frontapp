@@ -400,6 +400,9 @@ export const paymentResponseCopy = {
   help: 'Pedir ayuda por WhatsApp',
   backHome: 'Volver a la tienda',
   invalid: 'No encontramos los datos del pago.',
+  pendingTitle: 'Aún no pudimos confirmar tu pago',
+  pendingText: 'Puede ser la conexión. No vuelvas a pagar: toca "Confirmar de nuevo" o escríbenos por WhatsApp con tu número de pedido y lo revisamos.',
+  checkAgain: 'Confirmar de nuevo',
   whatsappMessage: 'Hola Kova, tuve un problema al pagar mi pedido con tarjeta.',
 }
 
