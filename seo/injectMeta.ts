@@ -42,6 +42,7 @@ export function plainText(value: string, max = DESCRIPTION_MAX): string {
   const text = value
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
+    .replace(/\s+([.,;:!?])/g, '$1')
     .trim()
   if (text.length <= max) return text
   const cut = text.slice(0, max - 1)
