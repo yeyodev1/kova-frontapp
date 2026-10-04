@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import AdminPanel from './AdminPanel.vue'
-import { slugify, type ProductForm } from '@/composables/admin/useProductEditor'
+import { ref } from 'vue'
+import { fixSlug, slugify, type ProductForm } from '@/composables/admin/useProductEditor'
 
 const props = defineProps<{ form: ProductForm }>()
+const editingLink = ref(false)
 
 // El form es un reactive compartido con el editor: se edita en sitio a propósito.
 function regenerateSlug() {
@@ -18,14 +20,21 @@ function regenerateSlug() {
         <input id="p-title" v-model="form.title" type="text" maxlength="160" />
       </div>
       <div class="fields__item">
-        <label for="p-slug">Slug (URL)</label>
-        <div class="fields__inline">
-          <input id="p-slug" v-model="form.slug" type="text" autocapitalize="off" />
+        <span class="fields__label">Link en la tienda</span>
+        <p class="fields__link">
+          <i class="fa-solid fa-link"></i>
+          <span>kovashopper.com/producto/<strong>{{ form.slug || '…' }}</strong></span>
+          <button type="button" class="fields__text-btn" @click="editingLink = !editingLink">
+            {{ editingLink ? 'Listo' : 'Cambiar' }}
+          </button>
+        </p>
+        <div v-if="editingLink" class="fields__inline">
+          <input id="p-slug" v-model="form.slug" type="text" autocapitalize="off" aria-label="Link en la tienda" @blur="fixSlug(form)" />
           <button type="button" class="fields__mini" title="Generar desde el título" @click="regenerateSlug">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
           </button>
         </div>
-        <small>kovashopper.com/producto/{{ form.slug || '…' }}</small>
+        <small v-if="editingLink">Se arma solo con el nombre. El link de Dropi va en "Enlace con Dropi", no aquí.</small>
       </div>
       <div class="fields__item">
         <label for="p-cat">Categoría</label>
@@ -36,8 +45,8 @@ function regenerateSlug() {
         <textarea id="p-short" v-model="form.shortDescription" rows="2" maxlength="280"></textarea>
       </div>
       <div class="fields__item">
-        <label for="p-desc">Descripción (HTML)</label>
-        <textarea id="p-desc" v-model="form.description" rows="8" class="fields__code"></textarea>
+        <label for="p-desc">Descripción larga</label>
+        <textarea id="p-desc" v-model="form.description" rows="8" placeholder="Cuenta qué es, para qué sirve y qué incluye. Los saltos de línea se respetan."></textarea>
       </div>
     </div>
   </AdminPanel>
@@ -70,5 +79,37 @@ function regenerateSlug() {
     font-size: 0.82rem;
     resize: vertical;
   }
+}
+.fields__label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: $ink-soft;
+}
+
+.fields__link {
+  @include flex(row, center, flex-start, 0.5rem);
+  flex-wrap: wrap;
+  font-size: $text-sm;
+  color: $ink-soft;
+  background: $sand;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  word-break: break-all;
+
+  i {
+    color: $accent;
+  }
+
+  strong {
+    color: $ink;
+  }
+}
+
+.fields__text-btn {
+  margin-left: auto;
+  font-weight: 600;
+  color: $accent;
+  text-decoration: underline;
+  @include tap-target;
 }
 </style>
