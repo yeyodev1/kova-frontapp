@@ -6,6 +6,8 @@ import AdminPager from '@/components/admin/AdminPager.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import DropiCatalogCard from '@/components/admin/DropiCatalogCard.vue'
 import DropiSyncPanel from '@/components/admin/DropiSyncPanel.vue'
+import DropiStatusCard from '@/components/admin/DropiStatusCard.vue'
+import DropiQuickImport from '@/components/admin/DropiQuickImport.vue'
 import { useDropi } from '@/composables/admin/useDropi'
 
 const {
@@ -16,7 +18,6 @@ const {
   total,
   loading,
   error,
-  missingToken,
   markup,
   importing,
   importedIds,
@@ -25,47 +26,85 @@ const {
   search,
   importItem,
   sync,
+  dropiStatus,
+  retryConnection,
 } = useDropi()
+
+const { connected, status } = dropiStatus
 </script>
 
 <template>
   <div class="dropi">
-    <AdminPageHead title="Importar de Dropi" subtitle="Busca en el catálogo y trae productos como borrador" />
+    <AdminPageHead
+      title="Importar de Dropi"
+      subtitle="Busca en el catálogo y trae productos como borrador"
+    />
 
-    <div v-if="missingToken" class="dropi__token" role="alert">
-      <i class="fa-solid fa-key"></i>
-      <div>
-        <p><strong>Falta configurar DROPI_INTEGRATION_KEY en el backend</strong></p>
-        <p>Sin esa llave no se puede consultar el catálogo ni sincronizar. Agrégala en las variables de entorno del backapp y vuelve a intentar.</p>
-      </div>
-    </div>
+    <DropiStatusCard @retry="retryConnection" />
 
-    <DropiSyncPanel :syncing="syncing" :results="syncResults" @sync="sync" />
+    <DropiQuickImport :markup="markup" :disabled="!connected" />
+
+    <DropiSyncPanel :syncing="syncing" :results="syncResults" :disabled="!connected" @sync="sync" />
 
     <form class="dropi__search" @submit.prevent="search(1)">
-      <label class="dropi__q">
-        <span class="visually-hidden">Buscar en Dropi</span>
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input v-model="q" type="search" placeholder="Buscar producto en Dropi" />
-      </label>
-      <label class="dropi__markup">
-        <span>Margen %</span>
-        <input v-model.number="markup" type="number" min="0" max="500" step="1" inputmode="numeric" />
-      </label>
-      <AdminButton type="submit" variant="primary" icon="fa-solid fa-magnifying-glass" :loading="loading">Buscar</AdminButton>
+      <fieldset class="dropi__fields" :disabled="!connected">
+        <legend class="visually-hidden">Buscar en el catálogo de Dropi</legend>
+        <label class="dropi__q">
+          <span class="visually-hidden">Buscar en Dropi</span>
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input v-model="q" type="search" placeholder="Buscar producto en Dropi" />
+        </label>
+        <label class="dropi__markup">
+          <span>Margen %</span>
+          <input
+            v-model.number="markup"
+            type="number"
+            min="0"
+            max="500"
+            step="1"
+            inputmode="numeric"
+          />
+        </label>
+        <AdminButton
+          type="submit"
+          variant="primary"
+          icon="fa-solid fa-magnifying-glass"
+          :loading="loading"
+          >Buscar</AdminButton
+        >
+      </fieldset>
     </form>
     <p class="dropi__note">
-      Si Dropi trae precio sugerido se usa ese; si no, costo + {{ markup || 0 }}%. Luego lo ajustas al editar.
+      Si Dropi trae precio sugerido se usa ese; si no, costo + {{ markup || 0 }}%. Luego lo ajustas
+      al editar.
     </p>
 
-    <AdminSkeleton v-if="loading" :rows="4" height="6rem" />
+    <AdminEmpty
+      v-if="status && !connected"
+      icon="fa-solid fa-lock"
+      title="Buscador en pausa"
+      :text="
+        status.configured
+          ? 'El catálogo de Dropi se abre aquí apenas habiliten el acceso. Mientras tanto puedes crear productos a mano y enlazarlos con su ID de Dropi.'
+          : 'Agrega DROPI_INTEGRATION_KEY en el backend para consultar el catálogo.'
+      "
+    >
+      <AdminButton to="/admin/productos" icon="fa-solid fa-plus">Crear producto a mano</AdminButton>
+    </AdminEmpty>
 
-    <AdminEmpty v-else-if="error && !missingToken" icon="fa-solid fa-plug-circle-xmark" title="Error con Dropi" :text="error">
+    <AdminSkeleton v-else-if="loading || !status" :rows="4" height="6rem" />
+
+    <AdminEmpty
+      v-else-if="error"
+      icon="fa-solid fa-plug-circle-xmark"
+      title="Error con Dropi"
+      :text="error"
+    >
       <AdminButton variant="primary" @click="search(page)">Reintentar</AdminButton>
     </AdminEmpty>
 
     <AdminEmpty
-      v-else-if="!items.length && !missingToken"
+      v-else-if="!items.length"
       icon="fa-solid fa-magnifying-glass"
       title="Sin resultados"
       text="Prueba con otra palabra o revisa la ortografía."
@@ -93,24 +132,17 @@ const {
 .dropi {
   @include flex(column, stretch, flex-start, 1rem);
 
-  &__token {
-    @include flex(row, flex-start, flex-start, 0.8rem);
-    padding: 1rem;
-    border-radius: $radius-md;
-    background: $warning-bg;
-    border: 1px solid rgba($warning, 0.5);
-    font-size: $text-sm;
-
-    > i {
-      color: darken($warning, 15%);
-      font-size: 1.2rem;
-      margin-top: 0.15rem;
-    }
-  }
-
-  &__search {
+  &__fields {
     @include flex(row, flex-end, flex-start, 0.5rem);
     flex-wrap: wrap;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+
+    &:disabled {
+      opacity: 0.55;
+    }
   }
 
   &__q {
