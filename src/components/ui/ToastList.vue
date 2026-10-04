@@ -32,11 +32,22 @@ const icons: Record<string, string> = {
 <style scoped lang="scss">
 .toasts {
   position: fixed;
-  bottom: 1.4rem;
-  right: 1.4rem;
+  // Arriba en móvil: abajo quedan las barras fijas de compra.
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+
+  @include from('md') {
+    top: auto;
+    left: auto;
+    bottom: 1.4rem;
+    right: 1.4rem;
+  }
+
   @include flex(column, stretch, flex-start, 0.6rem);
   z-index: 300;
-  max-width: min(360px, calc(100vw - 2.8rem));
+  max-width: 360px;
+  margin-inline: auto;
 
   &__item {
     @include flex(row, center, flex-start, 0.7rem);
