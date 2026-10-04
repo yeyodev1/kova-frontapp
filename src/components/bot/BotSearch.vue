@@ -20,7 +20,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 <style scoped lang="scss">
 .bsearch {
   position: relative;
-  flex: 1 1 16rem;
+  flex: 1 1 11rem;
   min-width: 0;
   margin: 0;
 
