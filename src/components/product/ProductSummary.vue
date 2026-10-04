@@ -11,6 +11,7 @@ const props = defineProps<{
   compareAt: number
   inStock: boolean
   lowStock: boolean
+  stock?: number
 }>()
 
 const savings = computed(() => (props.compareAt > props.price ? props.compareAt - props.price : 0))
@@ -21,19 +22,24 @@ const savings = computed(() => (props.compareAt > props.price ? props.compareAt 
     <p v-if="product.category" class="summary__category">{{ product.category }}</p>
     <h1 class="summary__title">{{ product.title }}</h1>
 
-    <p v-if="product.soldCount > 0" class="summary__sold">
-      <i class="fa-solid fa-fire" aria-hidden="true"></i> {{ productCopy.sold(product.soldCount) }}
-    </p>
+    <div class="summary__price">
+      <PriceTag :price="price" :compare-at="compareAt" size="lg" hide-off />
+      <span v-if="savings" class="summary__save">
+        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+        {{ productCopy.youSave(formatCents(savings)) }}
+      </span>
+    </div>
 
-    <PriceTag :price="price" :compare-at="compareAt" size="lg" />
-    <p v-if="savings" class="summary__save">{{ productCopy.youSave(formatCents(savings)) }}</p>
-
-    <p v-if="!inStock" class="summary__stock summary__stock--out">
-      <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> {{ productCopy.soldOut }}
-    </p>
-    <p v-else-if="lowStock" class="summary__stock">
-      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> {{ productCopy.lowStock }}
-    </p>
+    <ul v-if="product.soldCount > 0 || !inStock || lowStock" class="summary__meta">
+      <li v-if="product.soldCount > 0">{{ productCopy.sold(product.soldCount) }}</li>
+      <li v-if="!inStock" class="summary__stock summary__stock--out">
+        <span class="summary__pulse" aria-hidden="true"></span>{{ productCopy.soldOut }}
+      </li>
+      <li v-else-if="lowStock" class="summary__stock">
+        <span class="summary__pulse" aria-hidden="true"></span>
+        {{ stock ? productCopy.lowStockLine(stock) : productCopy.lowStock }}
+      </li>
+    </ul>
 
     <p v-if="product.shortDescription" class="summary__short">{{ product.shortDescription }}</p>
   </div>
@@ -41,36 +47,51 @@ const savings = computed(() => (props.compareAt > props.price ? props.compareAt 
 
 <style scoped lang="scss">
 .summary {
-  @include flex(column, flex-start, flex-start, 0.45rem);
+  @include flex(column, flex-start, flex-start, 0.65rem);
 
   &__category {
     @include eyebrow;
   }
 
   &__title {
-    @include display(clamp(1.4rem, 1.15rem + 1.2vw, 2.1rem), 600);
-    line-height: 1.2;
+    @include display(clamp(1.75rem, 1.35rem + 1.9vw, 2.75rem), 800, 122%);
+    line-height: 1.04;
   }
 
-  &__sold {
-    font-size: $text-sm;
-    font-weight: 600;
-    color: $accent-deep;
-
-    i {
-      color: $cta;
-    }
+  &__price {
+    @include flex(row, center, flex-start, 0.5rem 0.8rem);
+    flex-wrap: wrap;
+    margin-top: 0.35rem;
   }
 
   &__save {
+    @include flex(row, center, flex-start, 0.35rem);
     font-size: $text-sm;
     font-weight: 700;
-    color: $success;
+    color: $cta-deep;
+    background: $cta-soft;
+    padding: 0.32rem 0.75rem;
+    border-radius: $radius-pill;
+
+    i {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__meta {
+    list-style: none;
+    @include flex(row, center, flex-start, 0.45rem 1.1rem);
+    flex-wrap: wrap;
+    font-family: $font-mono;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $ink-soft;
   }
 
   &__stock {
-    font-size: $text-sm;
-    font-weight: 600;
+    @include flex(row, center, flex-start, 0.45rem);
     color: $cta-deep;
 
     &--out {
@@ -78,10 +99,49 @@ const savings = computed(() => (props.compareAt > props.price ? props.compareAt 
     }
   }
 
+  // Punto pulsante: el halo crece y se desvanece (transform + opacity).
+  &__pulse {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: currentColor;
+      animation: summary-pulse 1.8s $ease-out infinite;
+    }
+  }
+
+  &__stock--out &__pulse::after {
+    animation: none;
+  }
+
   &__short {
     color: $ink-soft;
     font-size: $text-base;
-    margin-top: 0.2rem;
+    max-width: 52ch;
+  }
+
+  @include reduced-motion {
+    &__pulse::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes summary-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
   }
 }
 </style>
