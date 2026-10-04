@@ -54,6 +54,12 @@ class AdminService extends APIBase {
     return data
   }
 
+  /** Producto manual (borrador). Sirve mientras la API de Dropi no esté habilitada. */
+  async createProduct(data: Partial<Product> & { title: string }): Promise<Product> {
+    const { data: created } = await this.post<Product>('admin/products', data)
+    return created
+  }
+
   async updateProduct(id: string, patch: Partial<Product>): Promise<Product> {
     const { data } = await this.put<Product>(`admin/products/${id}`, patch)
     return data
