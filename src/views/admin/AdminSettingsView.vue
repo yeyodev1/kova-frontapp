@@ -5,6 +5,7 @@ import AdminSkeleton from '@/components/admin/AdminSkeleton.vue'
 import AdminEmpty from '@/components/admin/AdminEmpty.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import BankAccountsEditor from '@/components/admin/BankAccountsEditor.vue'
+import TeamAlertsPanel from '@/components/admin/TeamAlertsPanel.vue'
 import { useSettingsForm } from '@/composables/admin/useSettingsForm'
 
 const { form, loading, loadError, saving, load, save } = useSettingsForm()
@@ -19,7 +20,7 @@ const moneyFields = [
 
 <template>
   <div class="settings">
-    <AdminPageHead title="Ajustes" subtitle="Recargos, envío, contacto y cuentas" />
+    <AdminPageHead title="Ajustes" subtitle="Recargos, envío, contacto, cuentas y avisos" />
 
     <AdminSkeleton v-if="loading" :rows="4" height="7rem" />
 
@@ -66,6 +67,8 @@ const moneyFields = [
         </AdminButton>
       </div>
     </form>
+
+    <TeamAlertsPanel v-if="!loading && !loadError" />
   </div>
 </template>
 
