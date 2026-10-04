@@ -7,6 +7,7 @@ import AnnouncementBar from '@/layout/AnnouncementBar.vue'
 import WhatsAppFloat from '@/layout/WhatsAppFloat.vue'
 import CartDrawer from '@/components/store/CartDrawer.vue'
 import ToastList from '@/components/ui/ToastList.vue'
+import UpdateBanner from '@/components/ui/UpdateBanner.vue'
 import { useStoreSettings } from '@/composables/useStoreSettings'
 import { captureUtm } from '@/composables/useUtm'
 
@@ -43,6 +44,7 @@ const showWhatsapp = computed(
     <WhatsAppFloat v-if="showWhatsapp" :raised="route.name === 'Product'" />
     <CartDrawer v-if="!isAdmin" />
     <ToastList />
+    <UpdateBanner />
   </div>
 </template>
 
