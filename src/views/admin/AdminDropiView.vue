@@ -8,6 +8,7 @@ import DropiCatalogCard from '@/components/admin/DropiCatalogCard.vue'
 import DropiSyncPanel from '@/components/admin/DropiSyncPanel.vue'
 import DropiStatusCard from '@/components/admin/DropiStatusCard.vue'
 import DropiQuickImport from '@/components/admin/DropiQuickImport.vue'
+import DropiClipperCard from '@/components/admin/DropiClipperCard.vue'
 import { useDropi } from '@/composables/admin/useDropi'
 
 const {
@@ -37,8 +38,10 @@ const { connected, status } = dropiStatus
   <div class="dropi">
     <AdminPageHead
       title="Importar de Dropi"
-      subtitle="Busca en el catálogo y trae productos como borrador"
+      subtitle="Trae productos de Dropi como borrador y enlázalos por su ID"
     />
+
+    <DropiClipperCard />
 
     <DropiStatusCard @retry="retryConnection" />
 
