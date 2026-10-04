@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { checkoutCopy } from '@/config/site'
 import { formatCents } from '@/utils/format'
 import PriceTicker from './PriceTicker.vue'
+import SummaryItems from './SummaryItems.vue'
 import type { Quote } from '@/types'
 
 const props = defineProps<{ quote: Quote | null; loading: boolean }>()
@@ -50,25 +51,7 @@ function onAfter(el: Element) {
             <span v-if="count" class="sum__count">{{ checkoutCopy.itemsCount(count) }}</span>
           </header>
 
-          <ul v-if="quote" class="sum__items">
-            <li v-for="item in quote.items" :key="`${item.product}-${item.variantId}`" class="sum__item">
-              <span class="sum__media">
-                <img v-if="item.image" :src="item.image" :alt="item.title" width="64" height="64" />
-                <i v-else class="fa-solid fa-box" aria-hidden="true"></i>
-              </span>
-              <span class="sum__qty" aria-hidden="true">{{ item.quantity }}</span>
-              <span class="sum__name">
-                {{ item.title }}
-                <small v-if="item.variantName">{{ item.variantName }}</small>
-                <small class="visually-hidden">× {{ item.quantity }}</small>
-              </span>
-              <strong class="sum__line">{{ formatCents(item.total) }}</strong>
-            </li>
-          </ul>
-          <div v-else class="sum__placeholder">
-            <span class="skeleton"></span>
-            <span class="skeleton"></span>
-          </div>
+          <SummaryItems :items="quote?.items || null" />
 
           <dl v-if="quote" class="sum__totals">
             <div>
@@ -185,82 +168,6 @@ function onAfter(el: Element) {
   &__count {
     @include eyebrow;
     color: $ink-muted;
-  }
-
-  &__items {
-    list-style: none;
-    @include flex(column, stretch, flex-start, 0.9rem);
-    padding-top: 0.9rem;
-
-    @include from('lg') {
-      padding-top: 0;
-    }
-  }
-
-  &__item {
-    position: relative;
-    @include flex(row, center, flex-start, 0.85rem);
-    font-size: $text-sm;
-  }
-
-  &__media {
-    @include plinth(14px);
-    @include flex(row, center, center);
-    flex-shrink: 0;
-    width: 4rem;
-    height: 4rem;
-    color: $alu-dark;
-
-    img {
-      width: 86%;
-      height: 86%;
-      object-fit: contain;
-    }
-  }
-
-  &__qty {
-    position: absolute;
-    top: -0.4rem;
-    left: 3.25rem;
-    min-width: 1.35rem;
-    height: 1.35rem;
-    padding-inline: 0.3rem;
-    border-radius: $radius-pill;
-    background: $accent-deep;
-    color: $surface;
-    font-family: $font-mono;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-align: center;
-    line-height: 1.35rem;
-    box-shadow: 0 0 0 2px $surface;
-  }
-
-  &__name {
-    flex: 1;
-    min-width: 0;
-    line-height: 1.35;
-    font-weight: 600;
-
-    small {
-      display: block;
-      font-weight: 400;
-      color: $ink-muted;
-    }
-  }
-
-  &__line {
-    @include price($text-base, 700);
-    white-space: nowrap;
-  }
-
-  &__placeholder {
-    @include flex(column, stretch, flex-start, 0.6rem);
-    padding-top: 0.9rem;
-
-    span {
-      height: 4rem;
-    }
   }
 
   &__totals {
