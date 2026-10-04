@@ -79,7 +79,8 @@ input,
 select,
 textarea {
   font: inherit;
-  font-size: 0.95rem;
+  // 16px como mínimo: con menos, iOS hace zoom al enfocar el campo.
+  font-size: 1rem;
   color: $ink;
   background: $surface;
   border: 1px solid $line;
@@ -163,9 +164,120 @@ label {
     color: $surface;
   }
 
+  // Solo para acciones de compra: es lo primero que debe ver el ojo.
+  &--cta {
+    background: $cta;
+    color: $surface;
+    box-shadow: 0 8px 20px rgba($cta, 0.28);
+
+    &:hover {
+      background: $cta-deep;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &--outline {
+    border: 1.5px solid $accent;
+    color: $accent-deep;
+    background: $surface;
+
+    &:hover {
+      background: $accent-soft;
+    }
+  }
+
+  &--whatsapp {
+    background: #1f9d55;
+    color: $surface;
+
+    &:hover {
+      background: #188546;
+    }
+  }
+
+  // Botón de compra: alto táctil generoso (≥ 52px)
+  &--lg {
+    min-height: 3.4rem;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    padding: 0.9rem 1.6rem;
+  }
+
+  &--block {
+    width: 100%;
+  }
+
   &:disabled {
     opacity: 0.45;
     pointer-events: none;
+  }
+}
+
+// Campos de formulario compartidos (checkout, rastreo)
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  input,
+  select {
+    min-height: 3.1rem;
+  }
+
+  &__hint {
+    font-size: $text-xs;
+    color: $ink-muted;
+    margin-top: 0.3rem;
+  }
+
+  &__error {
+    font-size: $text-xs;
+    color: $danger;
+    margin-top: 0.3rem;
+  }
+
+  &--invalid {
+    input,
+    select {
+      border-color: $danger;
+    }
+  }
+}
+
+// Bloque de carga: evita saltos mientras llega el API
+.skeleton {
+  background: linear-gradient(90deg, $sand 25%, lighten($sand, 3%) 50%, $sand 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s ease infinite;
+  border-radius: $radius-sm;
+}
+
+@keyframes skeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// Cajita de Payphone: el interior es suyo, solo lo adaptamos a nuestra tipografía y al ancho móvil.
+#pp-button {
+  width: 100%;
+  font-family: $font-principal;
+
+  iframe,
+  form,
+  > div {
+    max-width: 100% !important;
+  }
+
+  button {
+    border-radius: $radius-sm;
   }
 }
 
