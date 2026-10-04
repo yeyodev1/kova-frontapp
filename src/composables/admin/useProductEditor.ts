@@ -93,7 +93,9 @@ export function useProductEditor() {
   const toast = useToastStore()
 
   const product = ref<Product | null>(null)
-  const form = reactive<ProductForm>(toForm({ variants: [], offers: [], images: [] } as unknown as Product))
+  const form = reactive<ProductForm>(
+    toForm({ variants: [], offers: [], images: [] } as unknown as Product),
+  )
   const loading = ref(true)
   const loadError = ref('')
   const saving = ref(false)
@@ -120,18 +122,24 @@ export function useProductEditor() {
   const margin = computed(() => marginOf(dollarsToCents(form.price), cost.value))
   const belowCost = computed(() => {
     if (!cost.value) return false
-    const prices = [form.price, ...form.variants.map((v) => v.price), ...form.offers.map((o) => o.unitPrice)]
+    const prices = [
+      form.price,
+      ...form.variants.map((v) => v.price),
+      ...form.offers.map((o) => o.unitPrice),
+    ]
     return prices.some((p) => p > 0 && dollarsToCents(p) < cost.value)
   })
 
   function validate(): string[] {
     const list: string[] = []
     if (!form.title.trim()) list.push('El título es obligatorio')
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)) list.push('El slug solo admite minúsculas, números y guiones')
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug))
+      list.push('El slug solo admite minúsculas, números y guiones')
     if (!(form.price > 0)) list.push('El precio debe ser mayor a 0')
     if (form.compareAtPrice > 0 && form.compareAtPrice <= form.price)
       list.push('El precio tachado debe ser mayor al precio de venta')
-    if (form.dropiId.trim() && !ID.test(form.dropiId.trim())) list.push('El ID de Dropi solo lleva números')
+    if (form.dropiId.trim() && !ID.test(form.dropiId.trim()))
+      list.push('El ID de Dropi solo lleva números')
     form.variants.forEach((v) => {
       if (!(v.price > 0)) list.push(`La variante "${v.name}" necesita precio`)
       if (v.dropiVariationId.trim() && !ID.test(v.dropiVariationId.trim()))
@@ -139,7 +147,8 @@ export function useProductEditor() {
     })
     const qtys = new Set<number>()
     form.offers.forEach((o, i) => {
-      if (!Number.isInteger(o.quantity) || o.quantity < 1) list.push(`Oferta ${i + 1}: cantidad inválida`)
+      if (!Number.isInteger(o.quantity) || o.quantity < 1)
+        list.push(`Oferta ${i + 1}: cantidad inválida`)
       if (qtys.has(o.quantity)) list.push(`Hay dos ofertas para ${o.quantity} unidades`)
       qtys.add(o.quantity)
       if (!(o.unitPrice > 0)) list.push(`Oferta ${i + 1}: precio unitario inválido`)
@@ -147,7 +156,8 @@ export function useProductEditor() {
     if (form.offers.length && form.offers.filter((o) => o.isDefault).length !== 1)
       list.push('Marca exactamente una oferta como predeterminada')
     form.faqs.forEach((f, i) => {
-      if (!f.question.trim() || !f.answer.trim()) list.push(`La pregunta frecuente ${i + 1} está incompleta`)
+      if (!f.question.trim() || !f.answer.trim())
+        list.push(`La pregunta frecuente ${i + 1} está incompleta`)
     })
     return list
   }
@@ -225,6 +235,38 @@ export function useProductEditor() {
     }
   }
 
+  const syncing = ref(false)
+
+  /**
+   * Refresca desde Dropi sin perder lo que el admin está editando: solo se tocan
+   * los datos que manda Dropi (costo y variantes nuevas); stock y fecha vienen en `product`.
+   */
+  async function syncFromDropi() {
+    if (!product.value?.dropiId) return
+    syncing.value = true
+    try {
+      const updated = await adminService.syncProductFromDropi(product.value._id)
+      const fresh = toForm(updated)
+      form.costPrice = fresh.costPrice
+      fresh.variants.forEach((v) => {
+        const current = form.variants.find((f) => f._id === v._id)
+        if (current) {
+          current.costPrice = v.costPrice
+          current.stock = v.stock
+        } else form.variants.push(v)
+      })
+      const added = updated.variants.length - (product.value.variants?.length ?? 0)
+      product.value = updated
+      toast.success(
+        added > 0 ? `Sincronizado: ${added} variante(s) nueva(s)` : 'Sincronizado con Dropi',
+      )
+    } catch (e) {
+      toast.error(errorMessage(e, 'No se pudo sincronizar con Dropi'))
+    } finally {
+      syncing.value = false
+    }
+  }
+
   onMounted(load)
 
   return {
@@ -242,5 +284,7 @@ export function useProductEditor() {
     load,
     save,
     uploadImage,
+    syncing,
+    syncFromDropi,
   }
 }
