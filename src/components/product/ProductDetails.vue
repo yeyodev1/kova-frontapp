@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { productCopy, generalFaqs } from '@/config/site'
-import FaqList from '@/components/store/FaqList.vue'
+import ProductAccordion from './ProductAccordion.vue'
 import type { Product } from '@/types'
 
 const props = defineProps<{ product: Product }>()
@@ -14,88 +14,88 @@ const faqs = computed(() => [...props.product.faqs, ...generalFaqs])
     <section v-if="product.benefits.length" class="details__benefits">
       <h2 class="details__title">{{ productCopy.benefitsTitle }}</h2>
       <ul>
-        <li v-for="benefit in product.benefits" :key="benefit">
-          <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <li v-for="(benefit, i) in product.benefits" :key="benefit" v-reveal="Math.min(i, 6) * 80">
+          <span class="details__check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
           <span>{{ benefit }}</span>
         </li>
       </ul>
     </section>
 
-    <details v-if="product.description" class="details__description" open>
-      <summary>
-        <span>{{ productCopy.descriptionTitle }}</span>
-        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-      </summary>
+    <ProductAccordion
+      v-if="product.description"
+      :title="productCopy.descriptionTitle"
+      size="lg"
+      open
+    >
       <!-- El HTML llega saneado desde el backend. -->
       <div class="details__html" v-html="product.description"></div>
-    </details>
+    </ProductAccordion>
 
-    <section>
+    <section class="details__faqs">
       <h2 class="details__title">{{ productCopy.faqsTitle }}</h2>
-      <FaqList :items="faqs" />
+      <ProductAccordion v-for="faq in faqs" :key="faq.question" :title="faq.question">
+        <p class="details__answer">{{ faq.answer }}</p>
+      </ProductAccordion>
     </section>
   </div>
 </template>
 
 <style scoped lang="scss">
 .details {
-  @include flex(column, stretch, flex-start, 2rem);
+  @include flex(column, stretch, flex-start, 2.25rem);
 
   &__title {
-    @include display($text-xl, 600);
-    margin-bottom: 0.9rem;
+    @include display($text-xl, 800, 120%);
+    margin-bottom: 1rem;
   }
 
   &__benefits {
+    padding: 1.5rem 1.25rem;
+    border-radius: $radius-lg;
+    @include moss;
+
+    .details__title {
+      color: $surface;
+    }
+
     ul {
       list-style: none;
-      @include flex(column, stretch, flex-start, 0.65rem);
+      @include flex(column, stretch, flex-start, 0.8rem);
     }
 
     li {
-      @include flex(row, flex-start, flex-start, 0.65rem);
+      @include flex(row, center, flex-start, 0.8rem);
       font-size: $text-base;
+      font-weight: 500;
+      color: rgba($surface, 0.92);
     }
 
-    i {
-      color: $accent;
-      font-size: 1.15rem;
-      margin-top: 0.2rem;
+    @include from('md') {
+      padding: 2rem;
     }
   }
 
-  &__description {
-    @include card;
-    overflow: hidden;
+  &__check {
+    flex-shrink: 0;
+    @include flex(row, center, center);
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #ffffff, $alu 60%, $alu-dark);
+    color: $accent-deep;
+    font-size: 0.7rem;
+    box-shadow: inset 0 1px 0 rgba(#fff, 0.9);
+  }
 
-    summary {
-      @include flex(row, center, space-between);
-      list-style: none;
-      cursor: pointer;
-      padding: 1rem 1.15rem;
-      min-height: 3.2rem;
-      font-family: $font-display;
-      font-weight: 600;
-      font-size: $text-lg;
+  &__faqs {
+    @include flex(column, stretch, flex-start);
+  }
 
-      &::-webkit-details-marker {
-        display: none;
-      }
-
-      i {
-        color: $accent;
-        @include transition(transform);
-      }
-    }
-
-    &[open] summary i {
-      transform: rotate(180deg);
-    }
+  &__answer {
+    font-size: $text-sm;
   }
 
   &__html {
-    padding: 0 1.15rem 1.25rem;
-    color: $ink-soft;
     overflow-wrap: anywhere;
 
     :deep(p),
