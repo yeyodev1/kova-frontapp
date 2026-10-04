@@ -23,7 +23,14 @@ function variantMargin(price: number) {
           <label for="p-compare">Precio tachado ($)</label>
           <input id="p-compare" v-model.number="form.compareAtPrice" type="number" min="0" step="0.01" inputmode="decimal" />
         </div>
+        <div v-if="!form.variants.length" class="price__field">
+          <label for="p-stock">Stock (unidades)</label>
+          <input id="p-stock" v-model.number="form.stock" type="number" min="0" step="1" inputmode="numeric" />
+        </div>
       </div>
+      <p class="price__hint">
+        Con stock en 0 el producto se muestra agotado. Dropi no deja leer su stock: revísalo allá y ajústalo aquí.
+      </p>
 
       <div class="price__margin" :class="`price__margin--${marginTone(margin)}`">
         <div>
@@ -49,10 +56,7 @@ function variantMargin(price: number) {
       <template v-if="form.variants.length">
         <h3 class="price__sub">Variantes</h3>
         <div v-for="v in form.variants" :key="v._id" class="price__variant">
-          <p class="price__vname">
-            {{ v.name }}
-            <span>Stock {{ v.stock }}</span>
-          </p>
+          <p class="price__vname">{{ v.name }}</p>
           <div class="price__row">
             <div class="price__field">
               <label :for="`v-${v._id}`">Precio ($)</label>
@@ -61,6 +65,10 @@ function variantMargin(price: number) {
             <div class="price__field">
               <label :for="`vc-${v._id}`">Tachado ($)</label>
               <input :id="`vc-${v._id}`" v-model.number="v.compareAtPrice" type="number" min="0" step="0.01" inputmode="decimal" />
+            </div>
+            <div class="price__field">
+              <label :for="`vs-${v._id}`">Stock</label>
+              <input :id="`vs-${v._id}`" v-model.number="v.stock" type="number" min="0" step="1" inputmode="numeric" />
             </div>
           </div>
           <p v-if="variantMargin(v.price).known" class="price__vmargin" :class="`price__vmargin--${marginTone(variantMargin(v.price))}`">
@@ -155,5 +163,10 @@ function variantMargin(price: number) {
       color: $danger;
     }
   }
+}
+.price__hint {
+  font-size: 0.78rem;
+  color: $ink-muted;
+  margin-top: -0.4rem;
 }
 </style>
