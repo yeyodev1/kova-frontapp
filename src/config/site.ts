@@ -329,6 +329,7 @@ export const checkoutCopy = {
     selectProvince: 'Selecciona tu provincia',
     selectCity: 'Selecciona tu ciudad',
     loadingCities: 'Cargando ciudades...',
+    loadingProvinces: 'Cargando provincias...',
   },
   errors: {
     required: 'Completa este campo',
