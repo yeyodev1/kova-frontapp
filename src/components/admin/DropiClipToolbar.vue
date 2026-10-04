@@ -12,6 +12,9 @@ const emit = defineEmits<{ all: [value: boolean]; import: [] }>()
       <p class="tb__count">
         <strong>{{ selected }}</strong> de {{ total }} marcados
         <span v-if="blocked" class="tb__blocked">· {{ blocked }} sin ID o nombre</span>
+        <span v-else-if="!selected" class="tb__hint"
+          >· marca los que quieras o escribe su costo</span
+        >
       </p>
       <div class="tb__links">
         <button type="button" @click="emit('all', true)">Seleccionar todo</button>
@@ -70,6 +73,10 @@ const emit = defineEmits<{ all: [value: boolean]; import: [] }>()
 
   &__count {
     font-size: $text-sm;
+  }
+
+  &__hint {
+    color: $ink-muted;
   }
 
   &__blocked {
