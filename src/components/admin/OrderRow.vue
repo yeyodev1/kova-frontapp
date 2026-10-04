@@ -41,10 +41,19 @@ defineProps<{ order: Order }>()
   @include flex(row, flex-start, space-between, 0.4rem 0.8rem);
   flex-wrap: wrap;
   padding: 0.85rem 1rem;
-  @include transition(border-color);
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  transition:
+    border-color $dur $ease-out,
+    background-color $dur $ease-out,
+    transform $dur-fast $ease-out;
 
   &:hover {
-    border-color: $accent;
+    border-color: $alu-dark;
+  }
+
+  &:active {
+    transform: scale(0.99);
   }
 
   p {
@@ -58,7 +67,14 @@ defineProps<{ order: Order }>()
 
   &__number {
     @include flex(row, center, flex-start, 0.5rem);
-    font-weight: 600;
+    font-family: $font-mono;
+    font-size: $text-sm;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  &__total {
+    @include price(1.05rem, 800);
   }
 
   &__alert {
@@ -108,6 +124,15 @@ defineProps<{ order: Order }>()
     align-items: center;
     border-radius: 0;
     border-width: 0 0 1px;
+    box-shadow: none;
+
+    &:hover {
+      background: $alu-light;
+    }
+
+    &:active {
+      transform: none;
+    }
 
     &__main {
       flex: 0 0 150px;
