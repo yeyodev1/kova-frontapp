@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { botAdminCopy } from '@/config/site'
+import { botChatCopy } from './chat/chatCopy'
 import { formatEventTime } from '@/composables/useBotAdminEvents'
 import type { BotEvent } from '@/types'
 
@@ -12,8 +13,11 @@ const copy = botAdminCopy.events
   <li class="ber" :class="{ 'ber--error': event.error }">
     <header class="ber__head">
       <time class="ber__time" :datetime="event.createdAt">{{ formatEventTime(event.createdAt) }}</time>
-      <button type="button" class="ber__phone" :title="copy.phone" @click="emit('phone', event.phone)">
-        {{ event.phone }}
+      <RouterLink :to="`/admin/bot/chat/${encodeURIComponent(event.phone)}`" class="ber__phone" :title="botChatCopy.open">
+        <i class="fa-solid fa-comments" aria-hidden="true"></i> {{ event.phone }}
+      </RouterLink>
+      <button type="button" class="ber__filter" :title="copy.phone" :aria-label="copy.phone" @click="emit('phone', event.phone)">
+        <i class="fa-solid fa-filter" aria-hidden="true"></i>
       </button>
       <span class="ber__ms">{{ event.ms }} ms</span>
     </header>
@@ -74,12 +78,28 @@ const copy = botAdminCopy.events
   }
 
   &__phone {
+    @include flex(row, center, flex-start, 0.3rem);
     color: $accent-deep;
     font-family: inherit;
     font-size: inherit;
     text-decoration: underline dotted;
     text-underline-offset: 3px;
     @include focus-ring;
+  }
+
+  &__filter {
+    @include flex(row, center, center);
+    @include focus-ring;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    color: $ink-muted;
+    font-size: 0.65rem;
+
+    &:hover {
+      background: $sand;
+      color: $accent-deep;
+    }
   }
 
   &__ms {
