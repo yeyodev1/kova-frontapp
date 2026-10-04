@@ -20,6 +20,8 @@ export interface VariantForm {
   price: number // dólares
   compareAtPrice: number // dólares
   stock: number
+  dropiVariationId: string // texto: vacío = sin enlazar
+  costPrice: number // dólares
 }
 
 export interface ProductForm {
@@ -37,6 +39,8 @@ export interface ProductForm {
   images: string[]
   isPublished: boolean
   isFeatured: boolean
+  dropiId: string // texto: vacío = sin enlazar
+  costPrice: number // dólares
 }
 
 export function slugify(text: string): string {
@@ -63,6 +67,8 @@ function toForm(p: Product): ProductForm {
       price: centsToDollars(v.price),
       compareAtPrice: centsToDollars(v.compareAtPrice),
       stock: v.stock,
+      dropiVariationId: v.dropiVariationId ? String(v.dropiVariationId) : '',
+      costPrice: centsToDollars(v.costPrice ?? 0),
     })),
     offers: (p.offers || []).map((o) => ({ ...o, unitPrice: centsToDollars(o.unitPrice) })),
     benefits: [...(p.benefits || [])],
@@ -70,7 +76,16 @@ function toForm(p: Product): ProductForm {
     images: [...(p.images || [])],
     isPublished: p.isPublished,
     isFeatured: p.isFeatured,
+    dropiId: p.dropiId ? String(p.dropiId) : '',
+    costPrice: centsToDollars(p.costPrice ?? 0),
   }
+}
+
+const ID = /^\d{1,12}$/
+
+function idOrNull(text: string): number | null {
+  const clean = text.trim()
+  return clean ? Number(clean) : null
 }
 
 export function useProductEditor() {
@@ -84,6 +99,9 @@ export function useProductEditor() {
   const saving = ref(false)
   const uploading = ref(false)
   const errors = ref<string[]>([])
+  // Feedback visible del guardado: el toast se pierde si el admin está mirando la barra.
+  const justSaved = ref(false)
+  let savedTimer: ReturnType<typeof setTimeout> | undefined
 
   async function load() {
     loading.value = true
@@ -98,7 +116,7 @@ export function useProductEditor() {
     }
   }
 
-  const cost = computed(() => product.value?.costPrice ?? 0)
+  const cost = computed(() => dollarsToCents(form.costPrice))
   const margin = computed(() => marginOf(dollarsToCents(form.price), cost.value))
   const belowCost = computed(() => {
     if (!cost.value) return false
@@ -113,8 +131,11 @@ export function useProductEditor() {
     if (!(form.price > 0)) list.push('El precio debe ser mayor a 0')
     if (form.compareAtPrice > 0 && form.compareAtPrice <= form.price)
       list.push('El precio tachado debe ser mayor al precio de venta')
+    if (form.dropiId.trim() && !ID.test(form.dropiId.trim())) list.push('El ID de Dropi solo lleva números')
     form.variants.forEach((v) => {
       if (!(v.price > 0)) list.push(`La variante "${v.name}" necesita precio`)
+      if (v.dropiVariationId.trim() && !ID.test(v.dropiVariationId.trim()))
+        list.push(`El ID de variación de "${v.name}" solo lleva números`)
     })
     const qtys = new Set<number>()
     form.offers.forEach((o, i) => {
@@ -135,7 +156,13 @@ export function useProductEditor() {
     const variants = (product.value?.variants || []).map((v) => {
       const edited = form.variants.find((f) => f._id === v._id)
       return edited
-        ? { ...v, price: dollarsToCents(edited.price), compareAtPrice: dollarsToCents(edited.compareAtPrice) }
+        ? {
+            ...v,
+            price: dollarsToCents(edited.price),
+            compareAtPrice: dollarsToCents(edited.compareAtPrice),
+            dropiVariationId: idOrNull(edited.dropiVariationId),
+            costPrice: dollarsToCents(edited.costPrice),
+          }
         : v
     })
     return {
@@ -155,6 +182,8 @@ export function useProductEditor() {
       images: form.images,
       isPublished: form.isPublished,
       isFeatured: form.isFeatured,
+      dropiId: idOrNull(form.dropiId),
+      costPrice: dollarsToCents(form.costPrice),
     }
   }
 
@@ -170,6 +199,9 @@ export function useProductEditor() {
       product.value = await adminService.updateProduct(product.value._id, toPatch())
       Object.assign(form, toForm(product.value))
       toast.success('Producto guardado')
+      justSaved.value = true
+      clearTimeout(savedTimer)
+      savedTimer = setTimeout(() => (justSaved.value = false), 2600)
     } catch (e) {
       toast.error(errorMessage(e, 'No se pudo guardar'))
     } finally {
@@ -195,5 +227,20 @@ export function useProductEditor() {
 
   onMounted(load)
 
-  return { product, form, loading, loadError, saving, uploading, errors, cost, margin, belowCost, load, save, uploadImage }
+  return {
+    product,
+    form,
+    loading,
+    loadError,
+    saving,
+    justSaved,
+    uploading,
+    errors,
+    cost,
+    margin,
+    belowCost,
+    load,
+    save,
+    uploadImage,
+  }
 }
