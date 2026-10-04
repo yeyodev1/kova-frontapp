@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import { botAdminCopy } from '@/config/site'
+import { botChatCopy } from './chat/chatCopy'
 import { formatCents } from '@/utils/format'
 import { formatDateTime } from '@/composables/admin/format'
 import { waLink } from '@/composables/admin/whatsapp'
@@ -75,6 +76,9 @@ const isBusy = (action: BotSessionAction) => props.busy === `${action}:${props.s
     </div>
 
     <footer class="bsc__actions">
+      <AdminButton variant="primary" icon="fa-solid fa-comments" :to="`/admin/bot/chat/${encodeURIComponent(session.phone)}`">
+        {{ botChatCopy.open }}
+      </AdminButton>
       <AdminButton variant="whatsapp" icon="fa-brands fa-whatsapp" :href="waLink(session.phone, copy.waMessage)">
         {{ copy.openWhatsapp }}
       </AdminButton>
