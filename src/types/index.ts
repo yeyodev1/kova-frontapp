@@ -35,6 +35,8 @@ export interface ProductVariant {
   compareAtPrice: number
   stock: number
   sku: string
+  // Solo admin
+  costPrice?: number
 }
 
 export interface ProductOffer {
@@ -68,8 +70,8 @@ export interface Product {
   isPublished: boolean
   isFeatured: boolean
   soldCount: number
-  // Solo admin
-  dropiId?: number
+  // Solo admin. null al guardar desenlaza el producto de Dropi.
+  dropiId?: number | null
   costPrice?: number
   suggestedPrice?: number
   lastSyncedAt?: string
