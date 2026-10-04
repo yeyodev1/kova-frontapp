@@ -559,6 +559,12 @@ export const trackingCopy = {
       transfer: { label: 'Transferencia confirmada', icon: 'fa-solid fa-building-columns' },
       cod: { label: 'Pedido confirmado', icon: 'fa-solid fa-handshake' },
     } as Record<PaymentMethod, { label: string; icon: string }>,
+    // Mientras el pago es el paso actual no podemos decir "confirmado".
+    paymentPending: {
+      card: 'Pago con tarjeta',
+      transfer: 'Tu transferencia',
+      cod: 'Confirmación del pedido',
+    } as Record<PaymentMethod, string>,
     review: 'Comprobante en revisión',
     preparing: { label: 'Preparando envío', icon: 'fa-solid fa-box' },
     shipped: { label: 'En camino', icon: 'fa-solid fa-truck-fast' },
@@ -627,7 +633,9 @@ export const trackingCopy = {
     },
   } as Record<OrderStatus, { tone: 'wait' | 'progress' | 'done' | 'problem'; title: string; text: string }>,
   codShipped: 'Ten el efectivo listo: pagas al recibir.',
-  problemCta: 'Hablar con Kova por WhatsApp',
+  problemTitle: '¿Qué hacemos ahora?',
+  problemText: 'Escríbenos con tu número de pedido y una persona del equipo te ayuda a resolverlo hoy mismo.',
+  problemCta: 'Escríbenos por WhatsApp',
 }
 
 // ─── Layout ─────────────────────────────────────────────────────────────
