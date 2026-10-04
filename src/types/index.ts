@@ -424,7 +424,7 @@ export interface BotConfig {
 export type OrderChannel = 'web' | 'whatsapp_bot'
 
 /** Qué le toca al equipo con el pedido; lo calcula el backend en la lista del panel. */
-export type OrderTodo = 'dropi' | 'receipt' | 'guide'
+export type OrderTodo = 'dropi' | 'receipt' | 'guide' | 'payment'
 
 // Fusión de interfaces: amplía `Order` y `DashboardStats` de arriba sin reescribirlas.
 export interface Order {
