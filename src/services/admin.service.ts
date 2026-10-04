@@ -3,6 +3,9 @@ import type {
   DashboardStats,
   DropiManualInput,
   DropiCatalogItem,
+  DropiClipProduct,
+  DropiClipResult,
+  DropiLinkedProduct,
   DropiStatus,
   Lead,
   Order,
@@ -51,6 +54,31 @@ class AdminService extends APIBase {
       { timeout: 30000 },
     )
     return data
+  }
+
+  /** Botón "Enviar a Kova": guarda lo que el dueño leyó en Dropi. Máximo 60 por llamada. */
+  async dropiClip(
+    products: DropiClipProduct[],
+    markupPercent?: number,
+  ): Promise<{ results: DropiClipResult[] }> {
+    const { data } = await this.post<{ results: DropiClipResult[] }>(
+      'admin/dropi/clip',
+      { products, markupPercent },
+      undefined,
+      { timeout: 60000 },
+    )
+    return data
+  }
+
+  /** Cuáles de estos ids de Dropi ya están en la tienda. */
+  async dropiLinked(ids: number[]): Promise<DropiLinkedProduct[]> {
+    if (!ids.length) return []
+    const { data } = await this.get<{ items: DropiLinkedProduct[] }>(
+      'admin/dropi/linked',
+      undefined,
+      { params: { ids: ids.join(',') } },
+    )
+    return data.items
   }
 
   async syncDropi(what: 'products' | 'locations' | 'orders'): Promise<Record<string, unknown>> {
