@@ -3,6 +3,7 @@ import { botService } from '@/services/bot.service'
 import { botAdminCopy } from '@/config/site'
 import { useToastStore } from '@/stores/toast'
 import { errorMessage } from '@/composables/admin/format'
+import { normalizeConfig } from './useBotAdminShape'
 import type { BotConfig } from '@/types'
 
 // La configuración no cambia mientras el panel está abierto: se pide una vez por visita.
@@ -19,7 +20,7 @@ export function useBotAdminConfig() {
     loading.value = true
     error.value = ''
     try {
-      config.value = await botService.config()
+      config.value = normalizeConfig(await botService.config())
     } catch (e) {
       error.value = errorMessage(e, botAdminCopy.loadError)
     } finally {
