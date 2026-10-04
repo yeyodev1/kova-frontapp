@@ -451,6 +451,7 @@ export const orderCopy = {
   } as Record<PaymentMethod, string[]>,
   bankTitle: 'Datos para la transferencia',
   bankText: 'Transfiere a cualquiera de estas cuentas. Usa el monto exacto para confirmarlo más rápido.',
+  bankTextOne: 'Transfiere a esta cuenta. Usa el monto exacto para confirmarlo más rápido.',
   bankEmpty: 'Escríbenos por WhatsApp y te enviamos los datos bancarios al instante.',
   amountToPay: 'Monto exacto a transferir',
   copy: 'Copiar',
