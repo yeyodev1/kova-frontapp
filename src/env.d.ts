@@ -9,6 +9,9 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
+/** Versión del build actual (vite.config.ts). */
+declare const __APP_VERSION__: string
+
 // Cajita de Pagos de Payphone: la carga usePayphoneBox desde su CDN.
 interface PPaymentButtonBoxOptions {
   token: string
