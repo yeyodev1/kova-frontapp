@@ -390,7 +390,7 @@ export const paymentResponseCopy = {
   rejectedText: 'Tu tarjeta no fue cobrada o el pago fue rechazado. Puedes intentar de nuevo o elegir otro método de pago.',
   rejectedNote: 'Tu carrito sigue guardado: no tienes que elegir los productos otra vez.',
   retry: 'Intentar de nuevo',
-  otherMethod: 'Pagar contra entrega o por transferencia',
+  otherMethod: 'Elegir otro método de pago',
   help: 'Pedir ayuda por WhatsApp',
   backHome: 'Volver a la tienda',
   invalid: 'No encontramos los datos del pago.',
