@@ -23,6 +23,8 @@ export function useStoreSettings() {
 
   const announcement = computed(() => settings.value?.announcement?.trim() || '')
   const bankAccounts = computed(() => settings.value?.bankAccounts || [])
+  // Hasta que llegan los ajustes no se ofrece: mejor aparecer tarde que ofrecer algo apagado.
+  const acceptTransfers = computed(() => settings.value?.acceptTransfers === true && bankAccounts.value.length > 0)
 
-  return { settings, load, announcement, bankAccounts }
+  return { settings, load, announcement, bankAccounts, acceptTransfers }
 }
