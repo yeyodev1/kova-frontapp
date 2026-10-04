@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminPageHead from '@/components/admin/AdminPageHead.vue'
 import AdminChips from '@/components/admin/AdminChips.vue'
 import AdminSkeleton from '@/components/admin/AdminSkeleton.vue'
@@ -6,9 +8,13 @@ import AdminEmpty from '@/components/admin/AdminEmpty.vue'
 import AdminPager from '@/components/admin/AdminPager.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import ProductRow from '@/components/admin/ProductRow.vue'
+import ProductCreateForm from '@/components/admin/ProductCreateForm.vue'
 import { useProductsList } from '@/composables/admin/useProductsList'
 
 const { filters, items, total, pages, loading, error, toggling, load, goTo, toggle } = useProductsList()
+
+// ?nuevo=1 llega desde el acceso rápido del panel.
+const creating = ref(useRoute().query.nuevo === '1')
 
 const publishedOptions = [
   { value: '', label: 'Todos' },
@@ -20,8 +26,11 @@ const publishedOptions = [
 <template>
   <div class="products">
     <AdminPageHead title="Productos" :subtitle="loading ? 'Cargando…' : `${total} productos`">
-      <AdminButton variant="primary" icon="fa-solid fa-cloud-arrow-down" to="/admin/dropi">Importar de Dropi</AdminButton>
+      <AdminButton icon="fa-solid fa-cloud-arrow-down" to="/admin/dropi">Importar de Dropi</AdminButton>
+      <AdminButton variant="primary" icon="fa-solid fa-plus" @click="creating = !creating">Crear producto</AdminButton>
     </AdminPageHead>
+
+    <ProductCreateForm v-model:open="creating" />
 
     <div class="products__filters">
       <label class="products__search">
@@ -42,9 +51,10 @@ const publishedOptions = [
       v-else-if="!items.length"
       icon="fa-solid fa-box-open"
       title="No hay productos"
-      text="Importa productos desde el catálogo de Dropi para empezar a vender."
+      text="Crea uno a mano con su ID de Dropi o impórtalo del catálogo para empezar a vender."
     >
-      <AdminButton variant="primary" to="/admin/dropi">Ir a Dropi</AdminButton>
+      <AdminButton variant="primary" icon="fa-solid fa-plus" @click="creating = true">Crear producto</AdminButton>
+      <AdminButton icon="fa-solid fa-cloud-arrow-down" to="/admin/dropi">Importar de Dropi</AdminButton>
     </AdminEmpty>
 
     <div v-else class="products__list" :class="{ 'products__list--busy': loading }">
@@ -105,6 +115,8 @@ const publishedOptions = [
       @include card;
       gap: 0;
       overflow: hidden;
+      border-radius: $radius-md;
+      box-shadow: $shadow-sm;
     }
 
     &--busy {
