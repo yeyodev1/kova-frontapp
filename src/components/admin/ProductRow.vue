@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Product } from '@/types'
 import AdminToggle from './AdminToggle.vue'
+import DropiLinkBadge from './DropiLinkBadge.vue'
 import { formatCents } from '@/utils/money'
 import { marginOf, marginTone } from '@/composables/admin/margin'
 
@@ -23,6 +24,7 @@ const tone = computed(() => marginTone(margin.value))
         <span :class="{ 'prow__low': product.stock <= 5 }">Stock {{ product.stock }}</span>
         <span v-if="product.category"> · {{ product.category }}</span>
       </p>
+      <DropiLinkBadge :linked="!!product.dropiId" class="prow__link" />
     </div>
 
     <div class="prow__money">
@@ -61,33 +63,46 @@ const tone = computed(() => marginTone(margin.value))
   @include flex(row, flex-start, flex-start, 0.5rem 0.8rem);
   flex-wrap: wrap;
   padding: 0.8rem;
-  @include transition(border-color);
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  transition:
+    border-color $dur $ease-out,
+    background-color $dur $ease-out,
+    transform $dur-fast $ease-out;
 
   &:hover {
-    border-color: $accent;
+    border-color: $alu-dark;
+  }
+
+  &:active {
+    transform: scale(0.99);
   }
 
   &__img {
     width: 64px;
     height: 64px;
     flex-shrink: 0;
-    border-radius: $radius-sm;
-    object-fit: cover;
-    background: $paper;
+    border-radius: 12px;
+    object-fit: contain;
+    padding: 4px;
+    background: radial-gradient(120% 80% at 50% 0%, #fff 0%, $alu-light 55%, $alu 100%);
+    box-shadow: inset 0 -1px 0 rgba($alu-dark, 0.45);
+    mix-blend-mode: multiply;
 
     &--empty {
       @include flex(row, center, center);
-      color: $silver;
+      color: $alu-dark;
     }
   }
 
+  // Ocupa el resto del primer renglón: precio e interruptores bajan al segundo.
   &__info {
-    flex: 1 1 0;
+    flex: 1 1 calc(100% - 64px - 0.8rem);
     min-width: 0;
   }
 
   &__title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: $text-sm;
     line-height: 1.3;
     display: -webkit-box;
@@ -102,19 +117,27 @@ const tone = computed(() => marginTone(margin.value))
     color: $ink-muted;
   }
 
+  &__link {
+    margin-top: 0.35rem;
+  }
+
   &__low {
     color: $danger;
     font-weight: 600;
   }
 
+  // Móvil: precio, costo y margen en una sola línea junto a los interruptores.
   &__money {
-    flex: 1 1 100%;
-    text-align: left;
-    padding-left: calc(64px + 0.8rem);
+    flex: 1 1 0;
+    min-width: 0;
+    @include flex(row, baseline, flex-start, 0.15rem 0.6rem);
+    flex-wrap: wrap;
+    padding-top: 0.55rem;
+    border-top: 1px solid $paper;
   }
 
   &__price {
-    font-weight: 600;
+    @include price(1.05rem, 800);
   }
 
   &__margin {
@@ -133,8 +156,10 @@ const tone = computed(() => marginTone(margin.value))
   }
 
   &__flags {
-    @include flex(row, center, flex-end, 0.6rem);
-    align-self: flex-end;
+    @include flex(row, center, flex-end, 0.4rem);
+    align-self: stretch;
+    padding-top: 0.45rem;
+    border-top: 1px solid $paper;
   }
 
   &__star {
@@ -154,16 +179,34 @@ const tone = computed(() => marginTone(margin.value))
     align-items: center;
     border-radius: 0;
     border-width: 0 0 1px;
+    box-shadow: none;
+
+    &:hover {
+      background: $alu-light;
+    }
+
+    &:active {
+      transform: none;
+    }
+
+    &__info {
+      flex: 1 1 0;
+    }
 
     &__money {
       flex: 0 0 170px;
-      padding-left: 0;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-top: 0;
+      border-top: 0;
       text-align: right;
     }
 
     &__flags {
       flex: 0 0 170px;
       align-self: center;
+      padding-top: 0;
+      border-top: 0;
     }
   }
 }
