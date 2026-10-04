@@ -20,7 +20,10 @@ load()
 const chrome = computed(() => !route.meta.hideChrome)
 const isAdmin = computed(() => route.path.startsWith('/admin'))
 // Checkout no lleva chrome; en producto el botón sube para no tapar la barra de compra fija.
-const showWhatsapp = computed(() => chrome.value && !isAdmin.value)
+// En pedido recibido ya hay un botón grande de WhatsApp; el flotante taparía el uploader.
+const showWhatsapp = computed(
+  () => chrome.value && !isAdmin.value && route.name !== 'OrderSuccess',
+)
 </script>
 
 <template>
