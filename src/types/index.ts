@@ -20,3 +20,229 @@ export interface SessionUser {
   phone: string
   accountType: 'customer' | 'admin' | string
 }
+
+// ─── Tienda (ver kova-backapp/docs/API.md) ──────────────────────────────
+// Todos los montos son centavos USD.
+
+export type PaymentMethod = 'card' | 'cod' | 'transfer'
+
+export interface ProductVariant {
+  _id: string
+  dropiVariationId: number | null
+  name: string
+  attributes: Record<string, string>
+  price: number
+  compareAtPrice: number
+  stock: number
+  sku: string
+}
+
+export interface ProductOffer {
+  quantity: number
+  unitPrice: number
+  label: string
+  isDefault: boolean
+}
+
+export interface Faq {
+  question: string
+  answer: string
+}
+
+export interface Product {
+  _id: string
+  slug: string
+  title: string
+  shortDescription: string
+  description: string
+  images: string[]
+  category: string
+  price: number
+  compareAtPrice: number
+  type: 'SIMPLE' | 'VARIABLE'
+  variants: ProductVariant[]
+  offers: ProductOffer[]
+  benefits: string[]
+  faqs: Faq[]
+  stock: number
+  isPublished: boolean
+  isFeatured: boolean
+  soldCount: number
+  // Solo admin
+  dropiId?: number
+  costPrice?: number
+  suggestedPrice?: number
+  lastSyncedAt?: string
+}
+
+export interface ProductDetail extends Product {
+  related: Product[]
+}
+
+export interface BankAccount {
+  bank: string
+  type: string
+  number: string
+  holder: string
+  idNumber: string
+}
+
+export interface StoreSettings {
+  codSurcharge: number
+  transferSurcharge: number
+  shippingFee: number
+  freeShippingFrom: number
+  announcement: string
+  whatsapp: string
+  bankAccounts: BankAccount[]
+  defaultMarkupPercent?: number
+}
+
+export interface Province {
+  id: number
+  name: string
+}
+
+export interface City {
+  id: number
+  name: string
+  provinceId: number
+}
+
+export interface CartLine {
+  productId: string
+  variantId: string | null
+  quantity: number
+}
+
+export interface OrderItem {
+  product: string
+  variantId: string | null
+  title: string
+  variantName: string
+  image: string
+  quantity: number
+  unitPrice: number
+  total: number
+}
+
+export interface Quote {
+  subtotal: number
+  shippingFee: number
+  surcharge: number
+  total: number
+  items: OrderItem[]
+  surcharges: Record<PaymentMethod, number>
+}
+
+export type OrderStatus =
+  | 'pending_payment'
+  | 'awaiting_transfer'
+  | 'transfer_review'
+  | 'confirmed'
+  | 'sent_to_dropi'
+  | 'shipped'
+  | 'delivered'
+  | 'returned'
+  | 'cancelled'
+  | 'failed'
+
+export interface Customer {
+  firstName: string
+  lastName: string
+  phone: string
+  email: string
+  idNumber: string
+}
+
+export interface ShippingAddress {
+  provinceId: number
+  province: string
+  cityId: number
+  city: string
+  street: string
+  reference: string
+}
+
+export interface Order {
+  _id: string
+  number: string
+  customer: Customer
+  address: ShippingAddress
+  items: OrderItem[]
+  subtotal: number
+  shippingFee: number
+  surcharge: number
+  total: number
+  paymentMethod: PaymentMethod
+  paymentStatus: 'pending' | 'paid' | 'cod' | 'failed' | 'refunded'
+  status: OrderStatus
+  transfer: { receiptUrl: string; uploadedAt: string | null; confirmedAt: string | null }
+  dropi: {
+    orderId: number | null
+    status: string
+    guide: string
+    carrier: string
+    error: string
+    lastSyncAt: string | null
+  }
+  notes: string
+  createdAt: string
+}
+
+export interface PayphoneConfig {
+  token: string
+  storeId: string
+  clientTransactionId: string
+  amount: number
+  amountWithoutTax: number
+  currency: 'USD'
+  reference: string
+  email: string
+  phoneNumber: string
+}
+
+export interface CreateOrderPayload {
+  items: CartLine[]
+  paymentMethod: PaymentMethod
+  customer: Customer
+  address: ShippingAddress
+  notes?: string
+  utm?: Record<string, string>
+}
+
+export interface CreateOrderResponse {
+  order: Order
+  payphone?: PayphoneConfig
+}
+
+// ─── Admin ──────────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  ordersToday: number
+  revenueToday: number
+  pendingTransfers: number
+  dropiErrors: number
+  ordersByStatus: Record<string, number>
+  last7Days: { date: string; orders: number; revenue: number }[]
+}
+
+export interface DropiCatalogItem {
+  dropiId: number
+  name: string
+  type: 'SIMPLE' | 'VARIABLE'
+  costPrice: number
+  suggestedPrice: number
+  stock: number
+  image: string
+  imported: boolean
+}
+
+export interface Lead {
+  _id: string
+  phone: string
+  firstName: string
+  items: CartLine[]
+  converted: boolean
+  createdAt: string
+}
