@@ -49,10 +49,14 @@ const showWhatsapp = computed(() => chrome.value && !isAdmin.value)
   flex-direction: column;
   min-height: 100vh;
 
+  // Alto mínimo de pantalla: durante la transición de página (out-in) el main
+  // queda vacío un instante y sin esto el footer saltaría hacia arriba.
   &__main {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    min-height: 100svh;
   }
 }
 </style>
