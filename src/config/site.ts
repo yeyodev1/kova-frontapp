@@ -216,6 +216,7 @@ export const catalog = {
   emptyText: 'Prueba con otra palabra, revisa la ortografía o mira todas las categorías.',
   emptyCta: 'Ver todos los productos',
   retry: 'Reintentar',
+  askWhatsapp: 'Pregúntanos por WhatsApp',
   sorts: [
     { value: 'popular', label: 'Más vendidos' },
     { value: 'new', label: 'Más nuevos' },
