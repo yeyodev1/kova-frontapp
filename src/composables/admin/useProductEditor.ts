@@ -32,6 +32,7 @@ export interface ProductForm {
   category: string
   price: number
   compareAtPrice: number
+  stock: number // solo productos sin variantes; con variantes es la suma
   variants: VariantForm[]
   offers: OfferForm[]
   benefits: string[]
@@ -61,6 +62,7 @@ function toForm(p: Product): ProductForm {
     category: p.category || '',
     price: centsToDollars(p.price),
     compareAtPrice: centsToDollars(p.compareAtPrice),
+    stock: p.stock ?? 0,
     variants: (p.variants || []).map((v) => ({
       _id: v._id,
       name: v.name,
@@ -82,6 +84,10 @@ function toForm(p: Product): ProductForm {
 }
 
 const ID = /^\d{1,12}$/
+
+function units(value: number): number {
+  return Math.max(0, Math.round(Number(value) || 0))
+}
 
 function idOrNull(text: string): number | null {
   const clean = text.trim()
@@ -172,6 +178,7 @@ export function useProductEditor() {
             compareAtPrice: dollarsToCents(edited.compareAtPrice),
             dropiVariationId: idOrNull(edited.dropiVariationId),
             costPrice: dollarsToCents(edited.costPrice),
+            stock: units(edited.stock),
           }
         : v
     })
@@ -183,6 +190,7 @@ export function useProductEditor() {
       category: form.category.trim(),
       price: dollarsToCents(form.price),
       compareAtPrice: dollarsToCents(form.compareAtPrice),
+      ...(form.variants.length ? {} : { stock: units(form.stock) }),
       variants,
       offers: [...form.offers]
         .sort((a, b) => a.quantity - b.quantity)
@@ -248,6 +256,7 @@ export function useProductEditor() {
       const updated = await adminService.syncProductFromDropi(product.value._id)
       const fresh = toForm(updated)
       form.costPrice = fresh.costPrice
+      if (!fresh.variants.length) form.stock = fresh.stock
       fresh.variants.forEach((v) => {
         const current = form.variants.find((f) => f._id === v._id)
         if (current) {
