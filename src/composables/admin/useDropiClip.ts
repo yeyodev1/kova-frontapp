@@ -48,7 +48,8 @@ function toDraft(p: DropiClipProduct): ClipDraft {
   const id = positive(p.dropiId)
   return {
     key: `clip-${++seq}`,
-    selected: true,
+    // Llegan sin marcar: el dueño elige cuáles quiere en su tienda.
+    selected: false,
     dropiId: id && Number.isInteger(id) ? String(id) : '',
     title: String(p.title ?? '')
       .trim()
@@ -83,6 +84,11 @@ function isClipMessage(data: unknown): data is DropiClipMessage {
 export function idError(item: ClipDraft): string {
   if (!/^\d+$/.test(item.dropiId.trim()) || Number(item.dropiId) <= 0) return 'Falta el ID de Dropi'
   return ''
+}
+
+/** Escribir un costo o un precio es señal de que lo quiere: se marca solo. */
+export function pickOnPrice(item: ClipDraft) {
+  if ((item.cost ?? 0) > 0 || (item.price ?? 0) > 0) item.selected = true
 }
 
 export function titleError(item: ClipDraft): string {
@@ -136,8 +142,9 @@ export function useDropiClip() {
     source.pageType =
       meta?.pageType === 'detail' ? 'detail' : meta?.pageType === 'list' ? 'list' : ''
     markLinked(added)
-    if (added.length) toast.success(`Llegaron ${added.length} productos de Dropi`)
-    else toast.info('Esos productos ya estaban en la lista')
+    if (added.length) {
+      toast.success(`Llegaron ${added.length} productos de Dropi: marca los que quieras importar`)
+    } else toast.info('Esos productos ya estaban en la lista')
   }
 
   function onMessage(event: MessageEvent) {
