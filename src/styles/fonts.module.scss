@@ -1,7 +1,8 @@
 // Solo variables. Las fuentes se cargan con <link> en index.html: este archivo
 // se inyecta en cada SFC vía vite.config.ts, así que no debe emitir CSS.
 
-$font-display: 'Sora', system-ui, sans-serif;
-$font-principal: 'Inter', system-ui, sans-serif;
+$font-display: 'Archivo', system-ui, sans-serif; // se usa expandida (wdth 112-125)
+$font-principal: 'Hanken Grotesk', system-ui, sans-serif;
+$font-mono: 'JetBrains Mono', ui-monospace, monospace; // etiquetas utilitarias: stock, refs, contadores
 $font-secondary: $font-principal;
 $font-body: $font-principal;
