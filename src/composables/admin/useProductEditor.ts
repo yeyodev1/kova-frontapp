@@ -44,6 +44,47 @@ export interface ProductForm {
   costPrice: number // dólares
 }
 
+const DROPI_LINK = /dropi\.[a-z.]+\/.*?(\d{3,})/i
+
+/**
+ * El link de la tienda nunca debe bloquear el guardado: se limpia solo. Si alguien pega ahí
+ * el link de Dropi (pasa seguido), se usa para enlazar el producto y el link sale del título.
+ */
+export function fixSlug(form: ProductForm): void {
+  const raw = form.slug.trim()
+  const dropi = raw.match(DROPI_LINK)
+  if (dropi) {
+    if (!form.dropiId.trim() && dropi[1]) form.dropiId = dropi[1]
+    form.slug = slugify(form.title)
+    return
+  }
+  form.slug = slugify(raw) || slugify(form.title)
+}
+
+/** Si la descripción solo tiene párrafos y saltos (la escribimos nosotros), se edita como texto. */
+function toText(html: string): string {
+  if (!html || /<(?!\/?(p|br)\b)[a-z]/i.test(html)) return html
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p>/gi, '\n\n')
+    .replace(/<\/?p>/gi, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .trim()
+}
+
+/** Texto plano → párrafos HTML, para que los saltos de línea se vean en la tienda. */
+function toHtml(text: string): string {
+  const clean = text.trim()
+  if (!clean || /<[a-z][\s\S]*>/i.test(clean)) return clean
+  const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  return clean
+    .split(/\n{2,}/)
+    .map((block) => `<p>${escape(block).replace(/\n/g, '<br>')}</p>`)
+    .join('')
+}
+
 export function slugify(text: string): string {
   return text
     .normalize('NFD')
@@ -58,7 +99,7 @@ function toForm(p: Product): ProductForm {
     title: p.title,
     slug: p.slug,
     shortDescription: p.shortDescription || '',
-    description: p.description || '',
+    description: toText(p.description || ''),
     category: p.category || '',
     price: centsToDollars(p.price),
     compareAtPrice: centsToDollars(p.compareAtPrice),
@@ -139,8 +180,7 @@ export function useProductEditor() {
   function validate(): string[] {
     const list: string[] = []
     if (!form.title.trim()) list.push('El título es obligatorio')
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug))
-      list.push('El slug solo admite minúsculas, números y guiones')
+    fixSlug(form)
     if (!(form.price > 0)) list.push('El precio debe ser mayor a 0')
     if (form.compareAtPrice > 0 && form.compareAtPrice <= form.price)
       list.push('El precio tachado debe ser mayor al precio de venta')
@@ -186,7 +226,7 @@ export function useProductEditor() {
       title: form.title.trim(),
       slug: form.slug,
       shortDescription: form.shortDescription.trim(),
-      description: form.description,
+      description: toHtml(form.description),
       category: form.category.trim(),
       price: dollarsToCents(form.price),
       compareAtPrice: dollarsToCents(form.compareAtPrice),
