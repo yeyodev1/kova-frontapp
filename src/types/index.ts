@@ -82,11 +82,15 @@ export interface ProductDetail extends Product {
 }
 
 export interface BankAccount {
+  _id?: string
   bank: string
+  /** Clave del catálogo de bancos del backapp ("pichincha") u "otro". */
+  bankCode?: string
   type: string
   number: string
   holder: string
   idNumber: string
+  logoUrl?: string
 }
 
 export interface StoreSettings {
@@ -96,6 +100,9 @@ export interface StoreSettings {
   freeShippingFrom: number
   announcement: string
   whatsapp: string
+  /** Interruptor de Pagos y bancos: falso = ni la web ni el bot ofrecen transferencia. */
+  acceptTransfers?: boolean
+  /** Solo cuentas activas (vacío si las transferencias están apagadas). */
   bankAccounts: BankAccount[]
   defaultMarkupPercent?: number
 }
@@ -138,6 +145,7 @@ export interface Quote {
   total: number
   items: OrderItem[]
   surcharges: Record<PaymentMethod, number>
+  available?: Record<PaymentMethod, boolean>
 }
 
 export type OrderStatus =
@@ -182,7 +190,9 @@ export interface Order {
   paymentMethod: PaymentMethod
   paymentStatus: 'pending' | 'paid' | 'cod' | 'failed' | 'refunded'
   status: OrderStatus
-  transfer: { receiptUrl: string; uploadedAt: string | null; confirmedAt: string | null }
+  transfer: { receiptUrl: string; uploadedAt: string | null; confirmedAt: string | null; bank?: string }
+  /** Pedido que espera transferencia: la cuenta elegida o todas las activas. */
+  bankAccounts?: BankAccount[]
   dropi: {
     orderId: number | null
     status: string
@@ -236,6 +246,8 @@ export interface CreateOrderPayload {
   address: ShippingAddress
   notes?: string
   utm?: Record<string, string>
+  /** _id de la cuenta elegida para transferir. */
+  transferBank?: string
 }
 
 export interface CreateOrderResponse {
