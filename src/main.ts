@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import { useUserStore } from './stores/user'
 import { initPixel } from './utils/pixel'
+import { vReveal } from './directives/reveal'
 import '@/styles/global.scss'
 
 initPixel()
@@ -13,6 +14,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+app.directive('reveal', vReveal)
 
 const userStore = useUserStore(pinia)
 
