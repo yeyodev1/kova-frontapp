@@ -12,7 +12,16 @@ import { statusOrder } from '@/components/admin/orderLabels'
 import { useAdminBadges } from '@/composables/admin/useAdminBadges'
 import { formatCents } from '@/utils/money'
 
-const { stats, loading, error, refresh } = useAdminBadges()
+const { stats, incidents, loading, error, refresh } = useAdminBadges()
+
+const incidentTone = computed(() =>
+  incidents.value?.bySeverity.high ? 'danger' : incidents.value?.active ? 'warning' : 'success',
+)
+const incidentHint = computed(() => {
+  const s = incidents.value
+  if (!s?.active) return 'Nada por atender'
+  return s.bySeverity.high ? `${s.bySeverity.high} de severidad alta` : 'Reclamos, pagos y errores por atender'
+})
 
 onMounted(refresh)
 
@@ -29,6 +38,7 @@ const shortcuts = [
   { to: '/admin/productos/nuevo', label: 'Subir producto', icon: 'fa-solid fa-camera' },
   { to: '/admin/pedidos?status=transfer_review', label: 'Revisar transferencias', icon: 'fa-solid fa-building-columns' },
   { to: '/admin/pedidos?status=all', label: 'Ver pedidos', icon: 'fa-solid fa-receipt' },
+  { to: '/admin/incidencias', label: 'Atender incidencias', icon: 'fa-solid fa-triangle-exclamation' },
   { to: '/admin/carritos', label: 'Recuperar carritos', icon: 'fa-brands fa-whatsapp' },
   { to: '/admin/dropi', label: 'Importar de Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
   { to: '/admin/ajustes', label: 'Ajustes', icon: 'fa-solid fa-sliders' },
@@ -79,6 +89,17 @@ const shortcuts = [
           icon="fa-solid fa-triangle-exclamation"
           :tone="stats.dropiErrors ? 'danger' : 'accent'"
           to="/admin/pedidos?dropiError=1"
+        />
+        <AdminStatCard
+          v-if="incidents"
+          class="dash__stat"
+          style="--i: 5"
+          label="Incidencias abiertas"
+          :value="incidents.active"
+          icon="fa-solid fa-triangle-exclamation"
+          :tone="incidentTone"
+          :hint="incidentHint"
+          to="/admin/incidencias"
         />
       </div>
 
