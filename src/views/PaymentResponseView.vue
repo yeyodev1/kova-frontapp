@@ -10,9 +10,15 @@ import SuccessCheck from '@/components/order/SuccessCheck.vue'
 const route = useRoute()
 const router = useRouter()
 const cart = useCartStore()
-const status = ref<'loading' | 'approved' | 'rejected'>('loading')
+// rejected = Payphone dijo que no. pending = no pudimos hablar con el servidor: el cobro
+// pudo pasar, así que nunca se le dice "rechazado" a alguien que quizá sí pagó.
+const status = ref<'loading' | 'approved' | 'rejected' | 'pending'>('loading')
 
-// Payphone reversa el cobro si no se confirma en 5 minutos: se confirma apenas carga.
+const MAX_TRIES = 4
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+// Payphone reversa el cobro si no se confirma en 5 minutos: se confirma apenas carga,
+// y si falla la red se reintenta solo (1s, 2s, 4s) antes de pedir ayuda al cliente.
 async function confirm() {
   const id = String(route.query.id || '')
   const clientTransactionId = String(route.query.clientTransactionId || '')
@@ -20,19 +26,30 @@ async function confirm() {
     status.value = 'rejected'
     return
   }
-  try {
-    const { order, approved } = await storeService.confirmPayment(id, clientTransactionId)
-    if (!approved) {
-      status.value = 'rejected'
+  status.value = 'loading'
+  for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+    try {
+      const { order, approved } = await storeService.confirmPayment(id, clientTransactionId)
+      if (!approved) {
+        status.value = 'rejected'
+        return
+      }
+      status.value = 'approved'
+      trackPurchase(order)
+      cart.clear()
+      router.replace({ name: 'OrderSuccess', params: { number: order.number }, query: { phone: order.customer.phone } })
       return
+    } catch (e) {
+      // 4xx: el servidor respondió con un no definitivo (pedido inexistente, monto distinto).
+      const code = (e as { status?: number })?.status ?? 0
+      if (code >= 400 && code < 500 && code !== 408 && code !== 429) {
+        status.value = 'rejected'
+        return
+      }
+      if (attempt < MAX_TRIES) await sleep(1000 * 2 ** (attempt - 1))
     }
-    status.value = 'approved'
-    trackPurchase(order)
-    cart.clear()
-    router.replace({ name: 'OrderSuccess', params: { number: order.number }, query: { phone: order.customer.phone } })
-  } catch {
-    status.value = 'rejected'
   }
+  status.value = 'pending'
 }
 
 confirm()
@@ -52,6 +69,20 @@ confirm()
         <SuccessCheck />
         <h1 class="pr__title">{{ copy.approvedTitle }}</h1>
         <p class="pr__text">{{ copy.approvedText }}</p>
+      </section>
+
+      <section v-else-if="status === 'pending'" key="pending" class="pr__state" role="alert">
+        <span class="pr__bad pr__bad--pending" aria-hidden="true"><i class="fa-solid fa-hourglass-half"></i></span>
+        <h1 class="pr__title">{{ copy.pendingTitle }}</h1>
+        <p class="pr__text">{{ copy.pendingText }}</p>
+        <div class="pr__actions">
+          <button type="button" class="btn btn--primary btn--lg btn--block" @click="confirm">
+            <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> {{ copy.checkAgain }}
+          </button>
+          <a :href="whatsappLink(`${copy.whatsappMessage} Transacción ${route.query.id ?? ''}`)" class="btn btn--whatsapp btn--lg btn--block" target="_blank" rel="noopener">
+            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> {{ copy.help }}
+          </a>
+        </div>
       </section>
 
       <section v-else key="bad" class="pr__state" role="alert">
@@ -154,6 +185,11 @@ confirm()
     font-size: 2rem;
     margin-bottom: 0.5rem;
     animation: pop 0.45s $ease-spring;
+
+    &--pending {
+      background: $warning-bg;
+      color: $warning;
+    }
   }
 
   &__note {
