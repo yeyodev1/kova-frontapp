@@ -278,3 +278,44 @@ export interface Lead {
   converted: boolean
   createdAt: string
 }
+
+/** Producto leído por el botón "Enviar a Kova" desde una página de Dropi (montos en centavos). */
+export interface DropiClipProduct {
+  dropiId: number | null
+  title: string
+  images: string[]
+  costPrice?: number | null
+  suggestedPrice?: number | null
+  /** Precio de venta manual, solo cuando no hay costo para calcularlo. */
+  price?: number
+  stock?: number | null
+  description?: string
+  category?: string
+  supplier?: string
+  sourceUrl?: string
+}
+
+/** Mensaje que manda el bookmarklet al panel por postMessage. */
+export interface DropiClipMessage {
+  type: 'kova-clip'
+  version: number
+  pageType: 'detail' | 'list'
+  sourceUrl: string
+  products: DropiClipProduct[]
+}
+
+export interface DropiClipResult {
+  dropiId: number | null
+  productId: string | null
+  title: string
+  status: 'created' | 'updated' | 'error'
+  message?: string
+}
+
+/** Producto de la tienda ya enlazado a un id de Dropi (GET /admin/dropi/linked). */
+export interface DropiLinkedProduct {
+  dropiId: number
+  productId: string
+  title: string
+  isPublished: boolean
+}
