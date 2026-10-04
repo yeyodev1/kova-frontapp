@@ -1,3 +1,4 @@
+@use 'sass:math';
 @use 'colorVariables.module.scss' as *;
 @use 'fonts.module.scss' as *;
 
@@ -26,22 +27,46 @@ $radius-lg: 28px;
 $radius-pill: 999px;
 $ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-// Eyebrow: label chiquito en mayúsculas sobre cada título de sección
+$ease-out: cubic-bezier(0.16, 1, 0.3, 1); // entradas: rápido al inicio, aterriza suave
+$ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); // micro rebote para "pop" (contador, check)
+$dur-fast: 0.18s;
+$dur: 0.32s;
+$dur-slow: 0.6s;
+
+// Eyebrow: etiqueta utilitaria en mono. Nombra la sección, no decora.
 @mixin eyebrow {
-  font-family: $font-principal;
-  font-size: $text-xs;
+  font-family: $font-mono;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: $accent-deep;
+  color: $accent;
 }
 
-@mixin display($size: $display-md, $weight: 500) {
+// Display: Archivo expandida. La anchura es la personalidad de la marca,
+// eco de las mayúsculas anchas del logo.
+@mixin display($size: $display-md, $weight: 750, $width: 118%) {
   font-family: $font-display;
   font-size: $size;
   font-weight: $weight;
-  font-optical-sizing: auto;
-  line-height: 1.06;
-  letter-spacing: -0.02em;
+  font-stretch: $width;
+  font-variation-settings: 'wdth' #{strip-unit($width)};
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   text-wrap: balance;
+}
+
+// Precios: siempre Archivo con cifras tabulares para que no "bailen" al cambiar.
+@mixin price($size: $text-xl, $weight: 800) {
+  font-family: $font-display;
+  font-size: $size;
+  font-weight: $weight;
+  font-stretch: 112%;
+  font-variation-settings: 'wdth' 112;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+@function strip-unit($n) {
+  @return math.div($n, ($n * 0 + 1));
 }
