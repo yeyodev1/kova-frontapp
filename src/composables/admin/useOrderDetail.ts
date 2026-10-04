@@ -2,13 +2,14 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { adminService } from '@/services/admin.service'
 import { useToastStore } from '@/stores/toast'
-import type { Order } from '@/types'
+import type { DropiManualInput, Order, ShippingInput } from '@/types'
 import { errorMessage, formatDateTime } from './format'
 import { statusLabel } from '@/components/admin/orderLabels'
 import { formatCents } from '@/utils/money'
 import { useAdminBadges } from './useAdminBadges'
 
 type Action = 'confirm-transfer' | 'send-to-dropi' | 'cancel'
+type Busy = Action | 'dropi-manual' | 'shipping'
 
 const successText: Record<Action, string> = {
   'confirm-transfer': 'Transferencia confirmada',
@@ -23,7 +24,9 @@ export interface TimelineEvent {
   note?: string
 }
 
-type OrderWithHistory = Order & { history?: { status?: string; at?: string; date?: string; note?: string }[] }
+type OrderWithHistory = Order & {
+  history?: { status?: string; at?: string; date?: string; note?: string }[]
+}
 
 export function useOrderDetail() {
   const route = useRoute()
@@ -33,7 +36,7 @@ export function useOrderDetail() {
   const order = ref<OrderWithHistory | null>(null)
   const loading = ref(true)
   const error = ref('')
-  const busy = ref<Action | null>(null)
+  const busy = ref<Busy | null>(null)
   const confirmCancel = ref(false)
 
   async function load() {
@@ -64,6 +67,28 @@ export function useOrderDetail() {
     }
   }
 
+  /** Guarda cambios hechos a mano en Dropi. Devuelve true para que el formulario se cierre. */
+  async function save(kind: 'dropi-manual' | 'shipping', body: DropiManualInput | ShippingInput) {
+    if (!order.value || busy.value) return false
+    busy.value = kind
+    try {
+      order.value =
+        kind === 'dropi-manual'
+          ? await adminService.markCreatedInDropi(order.value._id, body as DropiManualInput)
+          : await adminService.updateShipping(order.value._id, body as ShippingInput)
+      toast.success(
+        kind === 'dropi-manual' ? 'Pedido marcado como creado en Dropi' : 'Envío actualizado',
+      )
+      refreshBadges()
+      return true
+    } catch (e) {
+      toast.error(errorMessage(e))
+      return false
+    } finally {
+      busy.value = null
+    }
+  }
+
   async function cancelOrder() {
     confirmCancel.value = false
     await run('cancel')
@@ -76,13 +101,17 @@ export function useOrderDetail() {
     () => !!order.value && order.value.status === 'confirmed' && !order.value.dropi?.orderId,
   )
   const canCancel = computed(
-    () => !!order.value && !['cancelled', 'delivered', 'returned', 'failed'].includes(order.value.status),
+    () =>
+      !!order.value &&
+      !['cancelled', 'delivered', 'returned', 'failed'].includes(order.value.status),
   )
 
   const whatsappMessage = computed(() => {
     const o = order.value
     if (!o) return ''
-    const lines = o.items.map((i) => `- ${i.quantity} x ${i.title}${i.variantName ? ` (${i.variantName})` : ''}`)
+    const lines = o.items.map(
+      (i) => `- ${i.quantity} x ${i.title}${i.variantName ? ` (${i.variantName})` : ''}`,
+    )
     return [
       `Hola ${o.customer.firstName}, te escribimos de Kova.`,
       `Recibimos tu pedido ${o.number}:`,
@@ -96,14 +125,30 @@ export function useOrderDetail() {
   const timeline = computed<TimelineEvent[]>(() => {
     const o = order.value
     if (!o) return []
-    const events: TimelineEvent[] = [{ label: 'Pedido creado', at: o.createdAt, icon: 'fa-solid fa-plus' }]
+    const events: TimelineEvent[] = [
+      { label: 'Pedido creado', at: o.createdAt, icon: 'fa-solid fa-plus' },
+    ]
     if (o.transfer?.uploadedAt)
-      events.push({ label: 'Comprobante subido', at: o.transfer.uploadedAt, icon: 'fa-solid fa-file-arrow-up' })
+      events.push({
+        label: 'Comprobante subido',
+        at: o.transfer.uploadedAt,
+        icon: 'fa-solid fa-file-arrow-up',
+      })
     if (o.transfer?.confirmedAt)
-      events.push({ label: 'Transferencia confirmada', at: o.transfer.confirmedAt, icon: 'fa-solid fa-check' })
+      events.push({
+        label: 'Transferencia confirmada',
+        at: o.transfer.confirmedAt,
+        icon: 'fa-solid fa-check',
+      })
     for (const h of o.history ?? []) {
       const at = h.at || h.date
-      if (at) events.push({ label: statusLabel(h.status || ''), at, icon: 'fa-solid fa-circle', note: h.note })
+      if (at)
+        events.push({
+          label: statusLabel(h.status || ''),
+          at,
+          icon: 'fa-solid fa-circle',
+          note: h.note,
+        })
     }
     if (o.dropi?.lastSyncAt)
       events.push({
@@ -126,6 +171,7 @@ export function useOrderDetail() {
     confirmCancel,
     load,
     run,
+    save,
     cancelOrder,
     canConfirmTransfer,
     canSendToDropi,
