@@ -55,7 +55,10 @@ const year = new Date().getFullYear()
     </div>
 
     <div class="footer__bar">
-      <span>© {{ year }} {{ site.name }} · {{ layoutCopy.footer.country }}</span>
+      <span>
+        © {{ year }} {{ site.name }} · {{ layoutCopy.footer.country }}
+        <span class="footer__legal">· {{ site.legal.holder }} · RUC {{ site.legal.ruc }}</span>
+      </span>
       <span class="footer__credit">
         {{ layoutCopy.footer.credit }} <a href="https://bakano.ec" target="_blank" rel="noopener">Bakano</a>
       </span>
@@ -221,6 +224,11 @@ const year = new Date().getFullYear()
     font-size: 0.68rem;
     letter-spacing: 0.04em;
     color: rgba($surface, 0.5);
+  }
+
+  // En móvil el RUC baja a su propia línea en vez de cortarse a la mitad.
+  &__legal {
+    white-space: nowrap;
   }
 
   &__credit a {
