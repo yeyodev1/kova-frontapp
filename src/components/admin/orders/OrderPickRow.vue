@@ -65,6 +65,11 @@ const emit = defineEmits<{ toggle: [] }>()
       border-bottom-width: 0;
     }
 
+    // Marcado: toda la fila (casilla incluida) toma el fondo, no solo la casilla.
+    &--checked &__row:not(:hover) {
+      background: transparent;
+    }
+
     &--checked {
       background: $alu-light;
     }
