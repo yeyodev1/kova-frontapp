@@ -6,13 +6,26 @@ import {
   checkoutCopy,
   paymentMethodLabel,
 } from '@/config/site'
+import { computed } from 'vue'
 import PriceRoll from './PriceRoll.vue'
 import type { PaymentMethod } from '@/types'
+import { useStoreSettings } from '@/composables/useStoreSettings'
+import { formatCents } from '@/utils/format'
 
-defineProps<{ total: number; inStock: boolean; title: string }>()
+const props = defineProps<{ total: number; inStock: boolean; title: string }>()
 const emit = defineEmits<{ buy: []; add: [] }>()
 
 const methods: PaymentMethod[] = ['card', 'transfer', 'cod']
+const { settings } = useStoreSettings()
+
+// Precio final por forma de pago: la tarjeta queda como la opción que más conviene,
+// con lo que se ahorra frente a contra entrega bien visible.
+function surcharge(m: PaymentMethod): number {
+  if (m === 'cod') return settings.value?.codSurcharge ?? 0
+  if (m === 'transfer') return settings.value?.transferSurcharge ?? 0
+  return 0
+}
+const savings = computed(() => Math.max(surcharge('cod'), surcharge('transfer')))
 </script>
 
 <template>
@@ -46,10 +59,17 @@ const methods: PaymentMethod[] = ['card', 'transfer', 'cod']
 
     <div class="actions__pay">
       <span class="actions__pay-label">{{ productCopy.paymentsTitle }}</span>
-      <span v-for="m in methods" :key="m" class="actions__chip">
-        <i :class="checkoutCopy.methods[m].icon" aria-hidden="true"></i>
-        {{ paymentMethodLabel[m] }}
-      </span>
+      <ul class="actions__prices">
+        <li v-for="m in methods" :key="m" class="actions__price" :class="{ 'actions__price--best': m === 'card' }">
+          <i :class="checkoutCopy.methods[m].icon" aria-hidden="true"></i>
+          <span class="actions__price-name">{{ paymentMethodLabel[m] }}</span>
+          <span v-if="m === 'card' && savings" class="actions__best">{{ productCopy.cardBest }}</span>
+          <strong>{{ formatCents(props.total + surcharge(m)) }}</strong>
+        </li>
+      </ul>
+      <p v-if="savings" class="actions__save">
+        <i class="fa-solid fa-tag" aria-hidden="true"></i> {{ productCopy.cardSaves(formatCents(savings)) }}
+      </p>
     </div>
 
     <a
@@ -153,5 +173,68 @@ const methods: PaymentMethod[] = ['card', 'transfer', 'cod']
       color: #1f9d55;
     }
   }
+}
+.actions__prices {
+  list-style: none;
+  width: 100%;
+  @include flex(column, stretch, flex-start, 0.4rem);
+}
+
+.actions__price {
+  @include flex(row, center, flex-start, 0.55rem);
+  padding: 0.6rem 0.8rem;
+  border: 1px solid $line;
+  border-radius: 12px;
+  background: $surface;
+  font-size: $text-sm;
+  color: $ink-soft;
+
+  i {
+    width: 1.1rem;
+    color: $ink-muted;
+  }
+
+  strong {
+    margin-left: auto;
+    @include price($text-base, 700);
+    color: $ink-soft;
+  }
+
+  &--best {
+    border-color: $success;
+    background: $success-bg;
+    color: $ink;
+
+    i,
+    strong {
+      color: $success;
+    }
+
+    strong {
+      font-weight: 800;
+    }
+  }
+}
+
+.actions__price-name {
+  font-weight: 600;
+}
+
+.actions__best {
+  font-family: $font-mono;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $surface;
+  background: $success;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+
+.actions__save {
+  font-size: $text-sm;
+  font-weight: 600;
+  color: $success;
 }
 </style>
