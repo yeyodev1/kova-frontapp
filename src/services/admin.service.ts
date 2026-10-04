@@ -71,7 +71,13 @@ class AdminService extends APIBase {
   }
 
   // ─── Órdenes ────────────────────────────────────────────
-  async orders(params: { status?: string; paymentMethod?: string; q?: string; page?: number }) {
+  async orders(params: {
+    status?: string
+    paymentMethod?: string
+    q?: string
+    page?: number
+    dropiError?: number
+  }) {
     const { data } = await this.get<Paginated<Order>>('admin/orders', undefined, { params })
     return data
   }
