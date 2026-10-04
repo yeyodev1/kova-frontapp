@@ -4,12 +4,12 @@
  */
 export const site = {
   name: 'Kova',
-  tagline: 'Tu nueva app, lista para crecer.',
-  description: 'Kova — hecho con Vue 3, TypeScript y SCSS.',
+  tagline: 'Productos que te facilitan la vida.',
+  description: 'Gadgets y productos útiles con envío a todo Ecuador.',
   url: 'https://kovashopper.com',
   email: 'hola@kovashopper.com',
-  // Solo dígitos con código de país, ej: 593984934039
-  whatsapp: '',
+  // Solo dígitos con código de país
+  whatsapp: '593997011366',
   social: {
     instagram: '',
     facebook: '',
@@ -17,12 +17,12 @@ export const site = {
   },
   nav: [
     { label: 'Inicio', to: '/' },
-    { label: 'Nosotros', to: '/#nosotros' },
-    { label: 'Contacto', to: '/#contacto' },
+    { label: 'Tienda', to: '/tienda' },
+    { label: 'Rastrear pedido', to: '/rastrear' },
   ],
 } as const
 
-export function whatsappLink(message = 'Hola, quiero más información'): string {
+export function whatsappLink(message = 'Hola Kova, quiero más información'): string {
   if (!site.whatsapp) return '#'
   return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`
 }
