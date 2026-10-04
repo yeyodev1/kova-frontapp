@@ -26,8 +26,8 @@ const byStatus = computed(() => {
 })
 
 const shortcuts = [
+  { to: '/admin/productos/nuevo', label: 'Subir producto', icon: 'fa-solid fa-camera' },
   { to: '/admin/pedidos?status=transfer_review', label: 'Revisar transferencias', icon: 'fa-solid fa-building-columns' },
-  { to: '/admin/productos?nuevo=1', label: 'Crear producto', icon: 'fa-solid fa-plus' },
   { to: '/admin/pedidos', label: 'Ver pedidos', icon: 'fa-solid fa-receipt' },
   { to: '/admin/carritos', label: 'Recuperar carritos', icon: 'fa-brands fa-whatsapp' },
   { to: '/admin/dropi', label: 'Importar de Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
@@ -39,6 +39,7 @@ const shortcuts = [
   <div class="dash">
     <AdminPageHead title="Panel" subtitle="Lo que pasa hoy en Kova">
       <AdminButton icon="fa-solid fa-rotate" :loading="loading" @click="refresh">Actualizar</AdminButton>
+      <AdminButton variant="primary" icon="fa-solid fa-camera" to="/admin/productos/nuevo">Subir producto</AdminButton>
     </AdminPageHead>
 
     <AdminSkeleton v-if="loading && !stats" :rows="4" />
