@@ -379,6 +379,8 @@ export const checkoutCopy = {
   surchargeLabel: (amount: string) => `+${amount}`,
   surchargeHint: 'recargo',
   noSurcharge: 'Sin recargo',
+  transferBankTitle: '¿A qué banco te queda mejor transferir?',
+  transferBankHint: 'Al confirmar te mostramos los datos de esa cuenta.',
   payphoneTitle: 'Paga con tu tarjeta',
   payphoneText: 'Formulario seguro de Payphone. Kova nunca ve los datos de tu tarjeta.',
   payphoneAmount: 'Total a pagar',
