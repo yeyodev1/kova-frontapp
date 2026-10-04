@@ -1,21 +1,27 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { site, layoutCopy, catalog } from '@/config/site'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { site, layoutCopy } from '@/config/site'
 import { useCartStore } from '@/stores/cart'
-import { useBodyScroll } from '@/composables/useBodyScroll'
+import BrandMark from '@/components/layout/BrandMark.vue'
+import HeaderSearch from '@/components/layout/HeaderSearch.vue'
+import MobileMenu from '@/components/layout/MobileMenu.vue'
 
 const route = useRoute()
-const router = useRouter()
 const cart = useCartStore()
 const mobileOpen = ref(false)
 const searchOpen = ref(false)
-const term = ref('')
-const searchInput = ref<HTMLInputElement | null>(null)
+const scrolled = ref(false)
+// Cambia solo cuando el contador sube: reinicia la animación "pop" sin disparar al cargar.
+const bump = ref(0)
 
-useBodyScroll(mobileOpen)
+watch(
+  () => cart.count,
+  (next, prev) => {
+    if (next > prev) bump.value++
+  },
+)
 
-// Al navegar se cierran el menú y el buscador.
 watch(
   () => route.fullPath,
   () => {
@@ -24,72 +30,70 @@ watch(
   },
 )
 
-async function toggleSearch() {
-  searchOpen.value = !searchOpen.value
-  mobileOpen.value = false
-  if (searchOpen.value) {
-    term.value = String(route.query.q || '')
-    await nextTick()
-    searchInput.value?.focus()
-  }
+function onScroll() {
+  scrolled.value = window.scrollY > 8
 }
 
-function submitSearch() {
-  const q = term.value.trim()
-  router.push({ path: '/tienda', query: q ? { q } : {} })
-  searchOpen.value = false
+function toggleSearch() {
+  searchOpen.value = !searchOpen.value
+  mobileOpen.value = false
 }
+
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 </script>
 
 <template>
-  <header class="header">
+  <header class="header" :class="{ 'header--scrolled': scrolled || searchOpen }">
     <div class="header__inner">
       <button
         class="header__icon header__burger"
-        :aria-label="mobileOpen ? layoutCopy.closeMenu : layoutCopy.openMenu"
+        :aria-label="layoutCopy.openMenu"
         :aria-expanded="mobileOpen"
-        @click="mobileOpen = !mobileOpen"
+        aria-controls="mobile-menu"
+        @click="mobileOpen = true"
       >
-        <i :class="mobileOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+        <span class="header__bars" aria-hidden="true"><span></span><span></span></span>
       </button>
 
-      <RouterLink to="/" class="header__logo" :aria-label="`${site.name}, inicio`">
-        <img :src="site.logo" alt="" width="36" height="36" />
-        <span>{{ site.name.toUpperCase() }}</span>
+      <RouterLink to="/" class="header__logo" :aria-label="layoutCopy.home">
+        <BrandMark />
       </RouterLink>
 
-      <nav class="header__nav" :class="{ 'header__nav--open': mobileOpen }" aria-label="Principal">
+      <nav class="header__nav" aria-label="Principal">
         <RouterLink v-for="link in site.nav" :key="link.to" :to="link.to" class="header__link">
           {{ link.label }}
         </RouterLink>
       </nav>
 
       <div class="header__actions">
-        <button class="header__icon" :aria-label="layoutCopy.search" :aria-expanded="searchOpen" @click="toggleSearch">
-          <i class="fa-solid fa-magnifying-glass"></i>
+        <button
+          class="header__icon"
+          :class="{ 'is-active': searchOpen }"
+          :aria-label="layoutCopy.search"
+          :aria-expanded="searchOpen"
+          @click="toggleSearch"
+        >
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         </button>
-        <button class="header__icon header__cart" :aria-label="`${layoutCopy.cart}: ${cart.count}`" @click="cart.isOpen = true">
-          <i class="fa-solid fa-bag-shopping"></i>
-          <span v-if="cart.count" class="header__count">{{ cart.count }}</span>
+        <button
+          class="header__icon header__cart"
+          :aria-label="`${layoutCopy.cart}: ${cart.count}`"
+          @click="cart.isOpen = true"
+        >
+          <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+          <span v-if="cart.count" :key="bump" class="header__count" :class="{ 'is-pop': bump > 0 }">
+            {{ cart.count }}
+          </span>
         </button>
       </div>
     </div>
 
-    <Transition name="fade">
-      <form v-if="searchOpen" class="header__search" role="search" @submit.prevent="submitSearch">
-        <label for="header-search" class="visually-hidden">{{ catalog.searchPlaceholder }}</label>
-        <input
-          id="header-search"
-          ref="searchInput"
-          v-model="term"
-          type="search"
-          enterkeyhint="search"
-          :placeholder="catalog.searchPlaceholder"
-          autocomplete="off"
-        />
-        <button type="submit" class="btn btn--primary">{{ layoutCopy.search }}</button>
-      </form>
-    </Transition>
+    <HeaderSearch v-model="searchOpen" />
+    <MobileMenu :open="mobileOpen" @close="mobileOpen = false" />
   </header>
 </template>
 
@@ -98,37 +102,56 @@ function submitSearch() {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba($paper, 0.94);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid $line;
+
+  // El fondo translúcido vive en un pseudo-elemento: así el blur no convierte
+  // al header en contenedor de los hijos fijos y solo animamos opacidad.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba($paper, 0.78);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    border-bottom: 1px solid rgba($alu-dark, 0.35);
+    box-shadow: 0 10px 30px -18px rgba($ink, 0.25);
+    opacity: 0;
+    transition: opacity $dur $ease-out;
+  }
+
+  &--scrolled::before {
+    opacity: 1;
+  }
 
   &__inner {
-    @include container;
+    @include container(1200px);
     @include flex(row, center, space-between, 0.5rem);
     position: relative;
-    min-height: 3.75rem;
+    height: 4rem;
+
+    @include from('md') {
+      height: 4.5rem;
+    }
   }
 
   &__logo {
-    @include flex(row, center, flex-start, 0.55rem);
-    font-family: $font-display;
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: 0.14em;
-    color: $accent-deep;
+    border-radius: 12px;
+    transform-origin: left center;
+    transition: transform $dur $ease-out;
 
-    img {
-      width: 2.25rem;
-      height: 2.25rem;
-      border-radius: 9px;
-      object-fit: cover;
-    }
-
-    // En móvil el logo queda centrado entre el menú y las acciones.
     @include until('md') {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
+      transform-origin: center;
+    }
+  }
+
+  &--scrolled &__logo {
+    transform: scale(0.9);
+
+    @include until('md') {
+      transform: translateX(-50%) scale(0.9);
     }
   }
 
@@ -136,43 +159,39 @@ function submitSearch() {
     display: none;
 
     @include from('md') {
-      @include flex(row, center, center, 1.75rem);
+      @include flex(row, center, center, 2.25rem);
       flex: 1;
-    }
-
-    &--open {
-      @include until('md') {
-        @include flex(column, stretch, flex-start, 0.25rem);
-        position: fixed;
-        inset: 3.75rem 0 0;
-        background: $paper;
-        padding: 1rem 1.25rem;
-        z-index: 90;
-      }
     }
   }
 
   &__link {
-    font-weight: 500;
+    @include eyebrow;
+    position: relative;
     color: $ink-soft;
-    padding: 0.85rem 0;
-    border-bottom: 1px solid $line;
-    @include transition(color);
+    padding: 0.6rem 0;
+    transition: color $dur $ease-out;
 
-    @include from('md') {
-      @include eyebrow;
-      color: $ink-soft;
-      padding: 0.5rem 0;
-      border-bottom: 2px solid transparent;
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.25rem;
+      height: 1.5px;
+      background: $accent;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform $dur $ease-out;
     }
 
     &:hover,
     &.router-link-exact-active {
       color: $accent-deep;
-    }
 
-    &.router-link-exact-active {
-      border-color: $accent;
+      &::after {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
     }
   }
 
@@ -186,12 +205,20 @@ function submitSearch() {
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 50%;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     color: $ink;
-    @include transition(background);
+    transition:
+      background-color $dur-fast $ease-out,
+      transform $dur-fast $ease-out;
+    -webkit-tap-highlight-color: transparent;
 
-    &:hover {
-      background: $sand;
+    &:hover,
+    &.is-active {
+      background: rgba($alu, 0.55);
+    }
+
+    &:active {
+      transform: scale(0.92);
     }
   }
 
@@ -201,37 +228,42 @@ function submitSearch() {
     }
   }
 
+  &__bars {
+    @include flex(column, flex-start, center, 5px);
+    width: 1.2rem;
+
+    span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    span:last-child {
+      width: 65%;
+    }
+  }
+
   &__count {
     position: absolute;
-    top: 0.2rem;
-    right: 0.1rem;
-    min-width: 1.15rem;
-    height: 1.15rem;
+    top: 0.15rem;
+    right: 0;
+    min-width: 1.2rem;
+    height: 1.2rem;
     padding: 0 0.3rem;
     border-radius: $radius-pill;
     background: $cta;
     color: $surface;
-    font-size: 0.68rem;
-    font-weight: 700;
-    line-height: 1.15rem;
+    font-family: $font-mono;
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.2rem;
     text-align: center;
-  }
+    box-shadow: 0 0 0 2px $paper;
 
-  &__search {
-    @include container(720px);
-    @include flex(row, center, flex-start, 0.5rem);
-    padding-block: 0 0.85rem;
-
-    input {
-      flex: 1;
-      min-height: 2.9rem;
-      border-radius: $radius-pill;
-      padding-inline: 1.1rem;
-    }
-
-    .btn {
-      min-height: 2.9rem;
-      padding-inline: 1.2rem;
+    &.is-pop {
+      animation: pop 0.45s $ease-spring;
     }
   }
 }
