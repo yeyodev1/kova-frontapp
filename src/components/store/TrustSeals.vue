@@ -16,24 +16,27 @@ defineProps<{ light?: boolean }>()
 <style scoped lang="scss">
 .seals {
   list-style: none;
-  @include flex(row, center, flex-start, 0.5rem 1rem);
+  @include flex(row, center, flex-start, 0.4rem 0.9rem);
   flex-wrap: wrap;
   font-size: $text-xs;
+  font-weight: 500;
   color: $ink-soft;
 
   &__item {
     @include flex(row, center, flex-start, 0.4rem);
+    white-space: nowrap;
 
     i {
       color: $accent;
+      font-size: 0.8em;
     }
   }
 
   &--light {
-    color: rgba($surface, 0.9);
+    color: rgba($surface, 0.85);
 
     i {
-      color: $silver;
+      color: $sage;
     }
   }
 }
