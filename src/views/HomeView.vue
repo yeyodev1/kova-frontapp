@@ -1,99 +1,115 @@
 <script setup lang="ts">
-import { site, whatsappLink } from '@/config/site'
+import { computed, ref } from 'vue'
+import { home, generalFaqs, whatsappLink } from '@/config/site'
+import { storeService } from '@/services/store.service'
+import HomeHero from '@/components/home/HomeHero.vue'
+import HowToBuy from '@/components/home/HowToBuy.vue'
+import ProductSection from '@/components/home/ProductSection.vue'
+import GuaranteeStrip from '@/components/store/GuaranteeStrip.vue'
+import PaymentMethodsInfo from '@/components/store/PaymentMethodsInfo.vue'
+import SectionHeading from '@/components/store/SectionHeading.vue'
+import FaqList from '@/components/store/FaqList.vue'
+import EmptyState from '@/components/store/EmptyState.vue'
+import type { Product } from '@/types'
 
-const features = [
-  { icon: 'fa-solid fa-bolt', title: 'Rápido', text: 'Vite 7, Vue 3.5 y builds de segundos.' },
-  { icon: 'fa-solid fa-palette', title: 'Con identidad', text: 'Tokens SCSS propios, sin Tailwind ni librerías UI.' },
-  { icon: 'fa-solid fa-plug', title: 'Conectado', text: 'APIBase listo para hablar con el backapp.' },
-]
+const featured = ref<Product[]>([])
+const popular = ref<Product[]>([])
+const loading = ref(true)
+
+const isEmpty = computed(() => !loading.value && !featured.value.length && !popular.value.length)
+
+async function load() {
+  const [f, p] = await Promise.allSettled([
+    storeService.products({ featured: true, limit: 8 }),
+    storeService.products({ sort: 'popular', limit: 8 }),
+  ])
+  if (f.status === 'fulfilled') featured.value = f.value.items
+  if (p.status === 'fulfilled') {
+    // Sin repetir en "más vendidos" lo que ya está en destacados.
+    const seen = new Set(featured.value.map((x) => x._id))
+    popular.value = p.value.items.filter((x) => !seen.has(x._id)).slice(0, 8)
+  }
+  loading.value = false
+}
+
+load()
 </script>
 
 <template>
   <div class="home">
-    <section class="hero">
-      <p class="hero__eyebrow">{{ site.name }}</p>
-      <h1 class="hero__title">{{ site.tagline }}</h1>
-      <p class="hero__text">{{ site.description }}</p>
-      <div class="hero__actions">
-        <RouterLink to="/login" class="btn btn--primary">Empezar</RouterLink>
-        <a v-if="site.whatsapp" :href="whatsappLink()" class="btn btn--ghost" target="_blank" rel="noopener">
-          <i class="fa-brands fa-whatsapp"></i> Escríbenos
-        </a>
-      </div>
-    </section>
+    <HomeHero />
 
-    <section id="nosotros" class="features">
-      <article v-for="feature in features" :key="feature.title" class="feature">
-        <span class="feature__icon"><i :class="feature.icon"></i></span>
-        <h3 class="feature__title">{{ feature.title }}</h3>
-        <p class="feature__text">{{ feature.text }}</p>
-      </article>
+    <div class="home__body">
+      <GuaranteeStrip />
+
+      <ProductSection
+        :eyebrow="home.featured.eyebrow"
+        :title="home.featured.title"
+        :products="featured"
+        :loading="loading"
+        link="/tienda"
+      />
+      <ProductSection
+        :eyebrow="home.popular.eyebrow"
+        :title="home.popular.title"
+        :products="popular"
+        :loading="loading && !featured.length"
+        link="/tienda?orden=popular"
+      />
+
+      <EmptyState v-if="isEmpty" icon="fa-solid fa-store" :title="home.empty.title" :text="home.empty.text">
+        <a :href="whatsappLink()" class="btn btn--whatsapp" target="_blank" rel="noopener">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+      </EmptyState>
+
+      <HowToBuy />
+      <PaymentMethodsInfo />
+
+      <section>
+        <SectionHeading :eyebrow="home.faqs.eyebrow" :title="home.faqs.title" />
+        <FaqList :items="generalFaqs" />
+      </section>
+    </div>
+
+    <section class="final">
+      <h2 class="final__title">{{ home.finalCta.title }}</h2>
+      <p class="final__text">{{ home.finalCta.text }}</p>
+      <RouterLink to="/tienda" class="btn btn--cta btn--lg">
+        {{ home.finalCta.cta }} <i class="fa-solid fa-arrow-right"></i>
+      </RouterLink>
     </section>
   </div>
 </template>
 
 <style scoped lang="scss">
-.hero {
-  @include container(880px);
-  @include flex(column, center, center, 1.2rem);
+.home {
+  &__body {
+    @include container;
+    @include flex(column, stretch, flex-start, $space-xl);
+    padding-block: 1.5rem $space-xl;
+
+    @include from('md') {
+      padding-top: 2.5rem;
+    }
+  }
+}
+
+.final {
+  @include flex(column, center, center, 0.8rem);
   text-align: center;
-  padding-block: $space-section $space-xl;
-
-  &__eyebrow {
-    @include eyebrow;
-  }
+  background: $sand;
+  padding: $space-xl 1.25rem;
 
   &__title {
-    @include display($display-lg);
+    @include display($display-sm, 600);
+    max-width: 22ch;
   }
 
   &__text {
-    font-size: $text-lg;
     color: $ink-soft;
-    max-width: 52ch;
-  }
-
-  &__actions {
-    @include flex(row, center, center, 0.8rem);
-    flex-wrap: wrap;
-    margin-top: 0.6rem;
-  }
-}
-
-.features {
-  @include container;
-  @include flex-cards(260px, 1.25rem);
-  padding-block: 0 $space-section;
-}
-
-.feature {
-  @include card;
-  padding: 1.8rem 1.6rem;
-  @include transition;
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: $shadow-md;
-  }
-
-  &__icon {
-    @include flex(row, center, center);
-    width: 2.6rem;
-    height: 2.6rem;
-    border-radius: $radius-sm;
-    background: $accent-soft;
-    color: $accent-deep;
-    margin-bottom: 1rem;
-  }
-
-  &__title {
-    @include display($text-xl, 600);
+    max-width: 48ch;
     margin-bottom: 0.4rem;
-  }
-
-  &__text {
-    font-size: $text-sm;
-    color: $ink-soft;
   }
 }
 </style>
