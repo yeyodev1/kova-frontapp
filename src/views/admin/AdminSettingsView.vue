@@ -4,15 +4,14 @@ import AdminPanel from '@/components/admin/AdminPanel.vue'
 import AdminSkeleton from '@/components/admin/AdminSkeleton.vue'
 import AdminEmpty from '@/components/admin/AdminEmpty.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
-import BankAccountsEditor from '@/components/admin/BankAccountsEditor.vue'
 import TeamAlertsPanel from '@/components/admin/TeamAlertsPanel.vue'
 import { useSettingsForm } from '@/composables/admin/useSettingsForm'
+import { paymentsCopy } from '@/config/paymentsAdmin'
 
 const { form, loading, loadError, saving, load, save } = useSettingsForm()
 
 const moneyFields = [
   { key: 'codSurcharge', label: 'Recargo contra entrega ($)', hint: 'Se suma al pagar al recibir' },
-  { key: 'transferSurcharge', label: 'Recargo transferencia ($)', hint: '0 si no cobras extra' },
   { key: 'shippingFee', label: 'Costo de envío ($)', hint: '0 = envío gratis siempre' },
   { key: 'freeShippingFrom', label: 'Envío gratis desde ($)', hint: '0 = no aplica' },
 ] as const
@@ -20,7 +19,7 @@ const moneyFields = [
 
 <template>
   <div class="settings">
-    <AdminPageHead title="Ajustes" subtitle="Recargos, envío, contacto, cuentas y avisos" />
+    <AdminPageHead title="Ajustes" subtitle="Recargos, envío, contacto y avisos" />
 
     <AdminSkeleton v-if="loading" :rows="4" height="7rem" />
 
@@ -59,7 +58,13 @@ const moneyFields = [
         </div>
       </AdminPanel>
 
-      <BankAccountsEditor :accounts="form.bankAccounts" />
+      <!-- Las cuentas, el interruptor y el recargo por transferencia viven en un solo lugar. -->
+      <AdminPanel title="Transferencias y cuentas bancarias" icon="fa-solid fa-building-columns">
+        <p class="settings__note">El interruptor, el recargo y las cuentas se manejan en Pagos y bancos.</p>
+        <AdminButton to="/admin/pagos" variant="soft" icon="fa-solid fa-arrow-right">
+          {{ paymentsCopy.settingsLink }}
+        </AdminButton>
+      </AdminPanel>
 
       <div class="settings__bar">
         <AdminButton type="submit" variant="primary" icon="fa-solid fa-floppy-disk" :loading="saving">
@@ -88,6 +93,12 @@ const moneyFields = [
       color: $ink-muted;
       margin-top: 0.25rem;
     }
+  }
+
+  &__note {
+    font-size: $text-sm;
+    color: $ink-soft;
+    margin-bottom: 0.8rem;
   }
 
   &__wide {
