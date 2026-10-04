@@ -220,6 +220,13 @@ export interface PayphoneConfig {
   reference: string
   email: string
   phoneNumber: string
+  amountWithTax?: number
+  tax?: number
+  service?: number
+  tip?: number
+  documentId?: string
+  identificationType?: number
+  optionalParameter?: string
 }
 
 export interface CreateOrderPayload {
