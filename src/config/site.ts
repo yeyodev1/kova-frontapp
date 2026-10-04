@@ -15,6 +15,12 @@ export const site = {
   description: 'Gadgets y productos útiles con envío a todo Ecuador.',
   url: 'https://kovashopper.com',
   email: 'hola@kovashopper.com',
+  // Identificación del vendedor: la Ley Orgánica de Defensa del Consumidor pide
+  // que quien vende en línea se identifique, y da confianza al comprador.
+  legal: {
+    holder: 'Andrew Navas',
+    ruc: '0958170177001',
+  },
   // Solo dígitos con código de país
   whatsapp: '593997011366',
   social: {
@@ -783,6 +789,7 @@ export const policies: Policy[] = [
         heading: 'Sobre Kova',
         body: [
           'Kova es una tienda en línea que vende productos con entrega en Ecuador. Al hacer un pedido aceptas estos términos.',
+          'Kova es operada por Andrew Navas, RUC 0958170177001, Ecuador.',
         ],
       },
       {
