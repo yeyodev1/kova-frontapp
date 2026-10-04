@@ -1,12 +1,14 @@
 import APIBase from './httpBase'
 import type {
   DashboardStats,
+  DropiManualInput,
   DropiCatalogItem,
   DropiStatus,
   Lead,
   Order,
   Paginated,
   Product,
+  ShippingInput,
   StoreSettings,
 } from '@/types'
 
@@ -126,6 +128,49 @@ class AdminService extends APIBase {
       timeout: 30000,
     })
     return data
+  }
+
+  /** El pedido ya se creó a mano en app.dropi.ec: guarda id, guía y transportadora. */
+  async markCreatedInDropi(id: string, body: DropiManualInput): Promise<Order> {
+    const { data } = await this.post<Order>(`admin/orders/${id}/dropi-manual`, body)
+    return data
+  }
+
+  async updateShipping(id: string, body: ShippingInput): Promise<Order> {
+    const { data } = await this.put<Order>(`admin/orders/${id}/shipping`, body)
+    return data
+  }
+
+  /** CSV para Dropi. Se baja como blob para mandar el Bearer (un link directo no lo lleva). */
+  async exportOrdersCsv(params: {
+    status?: string
+    paymentMethod?: string
+    q?: string
+    from?: string
+    to?: string
+    ids?: string
+  }): Promise<{ blob: Blob; filename: string; count: number }> {
+    try {
+      const res = await this.get<Blob>('admin/orders/export', undefined, {
+        params,
+        responseType: 'blob',
+        timeout: 60000,
+      })
+      const disposition = String(res.headers['content-disposition'] || '')
+      const filename = /filename="?([^";]+)"?/.exec(disposition)?.[1] || 'kova-pedidos-dropi.csv'
+      return { blob: res.data, filename, count: Number(res.headers['x-orders-count'] ?? -1) }
+    } catch (error) {
+      // Con responseType blob el { message } del backend llega como Blob: se lee para mostrarlo.
+      const err = error as { status?: number; message?: string; data?: unknown }
+      if (err.data instanceof Blob) {
+        try {
+          err.message = JSON.parse(await err.data.text()).message || err.message
+        } catch {
+          // Se queda el mensaje genérico.
+        }
+      }
+      throw err
+    }
   }
 
   // ─── Leads y ajustes ────────────────────────────────────
