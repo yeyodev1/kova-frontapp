@@ -499,6 +499,137 @@ export const orderTimeline: { label: string; statuses: OrderStatus[] }[] = [
   { label: 'Entregado', statuses: ['delivered'] },
 ]
 
+/** Rastreo de pedido (/rastrear). Llega un cliente ansioso: cada texto dice qué pasa y qué sigue. */
+export const trackingCopy = {
+  eyebrow: 'Rastreo de pedido',
+  title: 'Rastrea tu pedido',
+  lead: 'Escribe tu número de pedido y el celular con el que compraste. Te mostramos en qué va, paso a paso.',
+  number: 'Número de pedido',
+  numberPlaceholder: 'KV-1001',
+  numberHint: 'Puedes escribir solo los números, por ejemplo 1001.',
+  phone: 'Celular',
+  phonePlaceholder: '09XXXXXXXX',
+  cta: 'Ver mi pedido',
+  loading: 'Buscando tu pedido...',
+  errors: {
+    numberRequired: 'Escribe tu número de pedido, por ejemplo KV-1001.',
+    number: 'Revisa el número: tiene la forma KV-1001.',
+    phoneRequired: 'Escribe el celular con el que compraste.',
+    phone: 'Revisa el celular: son 10 dígitos y empieza con 09.',
+  },
+  secure: 'Solo tú ves tu pedido: pedimos el celular para protegerlo.',
+  whereTitle: '¿Dónde está mi número de pedido?',
+  where: [
+    { icon: 'fa-solid fa-envelope', text: 'En el correo de confirmación que te enviamos al comprar.' },
+    { icon: 'fa-brands fa-whatsapp', text: 'En el mensaje de WhatsApp con el resumen de tu compra.' },
+    { icon: 'fa-solid fa-receipt', text: 'En la página de confirmación que viste al terminar tu compra.' },
+  ],
+  notFoundTitle: 'No encontramos ese pedido',
+  notFoundText: 'Puede ser un detalle al escribirlo. Revisa esto:',
+  notFoundChecks: [
+    'El número empieza con KV- y lo encuentras en tu correo o WhatsApp.',
+    'El celular es el mismo que escribiste al comprar.',
+  ],
+  errorTitle: 'No pudimos consultar tu pedido',
+  retry: 'Corregir datos',
+  hello: (name: string) => (name ? `Hola, ${name}` : 'Hola'),
+  orderLabel: 'Pedido',
+  placedOn: (date: string) => `Hecho el ${date}`,
+  progressTitle: 'Cómo va tu pedido',
+  stepNow: 'Ahora',
+  shipTitle: 'Envío',
+  carrier: 'Transportadora',
+  carrierPending: 'Por asignar',
+  guide: 'Número de guía',
+  noGuide: 'Te enviaremos la guía apenas el paquete salga.',
+  destination: 'Destino',
+  itemsTitle: 'Tu compra',
+  total: 'Total',
+  method: 'Método de pago',
+  helpTitle: '¿Tienes dudas sobre tu pedido?',
+  helpText: 'Te responde una persona real del equipo de Kova.',
+  whatsappCta: 'Escríbenos por WhatsApp',
+  whatsappMessage: (n: string) => `Hola Kova, quiero saber de mi pedido ${n}`,
+  another: 'Rastrear otro pedido',
+  uploadReceipt: 'Subir comprobante',
+  steps: {
+    received: { label: 'Pedido recibido', icon: 'fa-solid fa-receipt' },
+    payment: {
+      card: { label: 'Pago confirmado', icon: 'fa-solid fa-credit-card' },
+      transfer: { label: 'Transferencia confirmada', icon: 'fa-solid fa-building-columns' },
+      cod: { label: 'Pedido confirmado', icon: 'fa-solid fa-handshake' },
+    } as Record<PaymentMethod, { label: string; icon: string }>,
+    review: 'Comprobante en revisión',
+    preparing: { label: 'Preparando envío', icon: 'fa-solid fa-box' },
+    shipped: { label: 'En camino', icon: 'fa-solid fa-truck-fast' },
+    delivered: { label: 'Entregado', icon: 'fa-solid fa-house-circle-check' },
+  },
+  hints: {
+    receiptUploaded: (date: string) => `Comprobante recibido el ${date}`,
+    paymentWait: {
+      card: 'Esperando que se complete el pago',
+      transfer: 'Esperando tu transferencia',
+      cod: 'Te escribimos por WhatsApp para confirmar',
+    } as Record<PaymentMethod, string>,
+    codPay: 'Pagas en efectivo al recibir',
+  },
+  // Qué significa el estado actual y qué sigue. tone colorea el chip.
+  status: {
+    pending_payment: {
+      tone: 'wait',
+      title: 'Falta completar el pago',
+      text: 'Tu pago con tarjeta no se completó. Si ya te cobraron, escríbenos y lo revisamos al momento.',
+    },
+    awaiting_transfer: {
+      tone: 'wait',
+      title: 'Esperamos tu transferencia',
+      text: 'Apenas la recibamos preparamos tu paquete. Sube el comprobante para confirmarla más rápido.',
+    },
+    transfer_review: {
+      tone: 'wait',
+      title: 'Estamos revisando tu comprobante',
+      text: 'Lo confirmamos en horario de atención y te avisamos por WhatsApp.',
+    },
+    confirmed: {
+      tone: 'progress',
+      title: 'Tu pedido está confirmado',
+      text: 'Lo estamos alistando para entregarlo a la transportadora.',
+    },
+    sent_to_dropi: {
+      tone: 'progress',
+      title: 'Estamos preparando tu paquete',
+      text: 'En cuanto salga de bodega te enviamos la guía para que lo sigas.',
+    },
+    shipped: {
+      tone: 'progress',
+      title: 'Tu paquete va en camino',
+      text: 'Con el número de guía puedes seguirlo con la transportadora.',
+    },
+    delivered: {
+      tone: 'done',
+      title: '¡Entregado!',
+      text: 'Que lo disfrutes. Si algo no está bien, escríbenos y lo resolvemos.',
+    },
+    returned: {
+      tone: 'problem',
+      title: 'Tu pedido fue devuelto',
+      text: 'La transportadora no pudo entregarlo y regresó a bodega. Escríbenos para coordinar un nuevo envío.',
+    },
+    cancelled: {
+      tone: 'problem',
+      title: 'Este pedido fue cancelado',
+      text: 'Si no pediste cancelarlo o quieres volver a hacerlo, escríbenos y te ayudamos.',
+    },
+    failed: {
+      tone: 'problem',
+      title: 'Tuvimos un problema con tu pedido',
+      text: 'Algo falló en el proceso. Escríbenos por WhatsApp y lo resolvemos contigo.',
+    },
+  } as Record<OrderStatus, { tone: 'wait' | 'progress' | 'done' | 'problem'; title: string; text: string }>,
+  codShipped: 'Ten el efectivo listo: pagas al recibir.',
+  problemCta: 'Hablar con Kova por WhatsApp',
+}
+
 // ─── Layout ─────────────────────────────────────────────────────────────
 
 export const layoutCopy = {
