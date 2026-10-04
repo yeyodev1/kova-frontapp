@@ -30,6 +30,8 @@ const {
   load,
   save,
   uploadImage,
+  syncing,
+  syncFromDropi,
 } = useProductEditor()
 </script>
 
@@ -37,7 +39,12 @@ const {
   <div class="edit">
     <AdminSkeleton v-if="loading" :rows="5" height="9rem" />
 
-    <AdminEmpty v-else-if="loadError || !product" icon="fa-solid fa-box-open" title="No se pudo cargar" :text="loadError">
+    <AdminEmpty
+      v-else-if="loadError || !product"
+      icon="fa-solid fa-box-open"
+      title="No se pudo cargar"
+      :text="loadError"
+    >
       <AdminButton variant="primary" @click="load">Reintentar</AdminButton>
       <AdminButton to="/admin/productos">Volver</AdminButton>
     </AdminEmpty>
@@ -48,7 +55,11 @@ const {
         :subtitle="product.dropiId ? `Dropi #${product.dropiId}` : 'Producto creado a mano'"
         back="/admin/productos"
       >
-        <AdminButton v-if="product.isPublished" :href="`/producto/${product.slug}`" icon="fa-solid fa-arrow-up-right-from-square">
+        <AdminButton
+          v-if="product.isPublished"
+          :href="`/producto/${product.slug}`"
+          icon="fa-solid fa-arrow-up-right-from-square"
+        >
           Ver en tienda
         </AdminButton>
       </AdminPageHead>
@@ -57,7 +68,12 @@ const {
         <div class="edit__col edit__col--main">
           <ProductBasicsForm :form="form" />
           <ProductImagesEditor :images="form.images" :uploading="uploading" @upload="uploadImage" />
-          <AdminListEditor :items="form.benefits" title="Beneficios" icon="fa-solid fa-check" placeholder="Carga en 2 horas" />
+          <AdminListEditor
+            :items="form.benefits"
+            title="Beneficios"
+            icon="fa-solid fa-check"
+            placeholder="Carga en 2 horas"
+          />
           <ProductFaqsEditor :faqs="form.faqs" />
         </div>
         <div class="edit__col">
@@ -77,7 +93,13 @@ const {
             :margin="margin"
             :below-cost="belowCost"
           />
-          <ProductDropiLink :form="form" :last-synced-at="product.lastSyncedAt" />
+          <ProductDropiLink
+            :form="form"
+            :last-synced-at="product.lastSyncedAt"
+            :saved-dropi-id="product.dropiId"
+            :syncing="syncing"
+            @sync="syncFromDropi"
+          />
           <ProductOffersEditor :offers="form.offers" :base-price="form.price" />
         </div>
       </div>
@@ -87,11 +109,20 @@ const {
       </ul>
 
       <div class="edit__bar">
-        <p v-if="belowCost" class="edit__warn"><i class="fa-solid fa-triangle-exclamation"></i> Precio bajo el costo</p>
+        <p v-if="belowCost" class="edit__warn">
+          <i class="fa-solid fa-triangle-exclamation"></i> Precio bajo el costo
+        </p>
         <Transition name="saved">
-          <p v-if="justSaved" class="edit__saved" role="status"><i class="fa-solid fa-circle-check"></i> Guardado</p>
+          <p v-if="justSaved" class="edit__saved" role="status">
+            <i class="fa-solid fa-circle-check"></i> Guardado
+          </p>
         </Transition>
-        <AdminButton type="submit" variant="primary" icon="fa-solid fa-floppy-disk" :loading="saving">
+        <AdminButton
+          type="submit"
+          variant="primary"
+          icon="fa-solid fa-floppy-disk"
+          :loading="saving"
+        >
           Guardar cambios
         </AdminButton>
       </div>
