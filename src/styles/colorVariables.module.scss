@@ -2,33 +2,41 @@
 // papel y acento, no de "rosa" o "gris 700".
 @use 'sass:color';
 
-// Acento de marca: el verde salvia del logo
-$accent: #4f7560;
-$accent-deep: #2f4a3b;
-$accent-soft: color.mix($accent, #ffffff, 14%);
-$silver: #c9cfcb; // el plateado del logo, para detalles
+// Dirección "vitrina de aluminio": el salvia y el plateado del logo como
+// materiales, y un solo color cálido (cobre) reservado para comprar.
 
-// CTA de compra: cálido y opuesto al salvia para que el botón de comprar sea
-// lo primero que ve el ojo. Solo en acciones de compra, no decorativo.
-$cta: #e0662f;
-$cta-deep: #c4521f;
-$cta-soft: color.mix($cta, #ffffff, 12%);
+// Salvia: la marca
+$accent: #4a6e58; // salvia profundo, textos de marca y estados activos
+$accent-deep: #1f3329; // musgo, secciones oscuras y footer
+$accent-soft: #dfe8e1; // salvia lavado, fondos de selección
+$sage: #8eaa96; // el verde del fondo del logo
+
+// Aluminio: el plateado del logo hecho superficie
+$alu-light: #f6f8f6;
+$alu: #d5dbd6;
+$alu-dark: #a9b2ac;
+$silver: $alu;
+
+// Cobre: SOLO acciones de compra (comprar, agregar, confirmar)
+$cta: #d1622f;
+$cta-deep: #b04f22;
+$cta-soft: #f8e6dc;
 
 // Superficies
-$paper: #f7f8f6; // fondo base, gris verdoso muy claro
-$surface: #ffffff; // superficies elevadas
-$sand: #e9efea; // bloques suaves (salvia lavado)
-$line: #dde3de; // bordes
+$paper: #edf1ec; // fondo base: niebla salvia
+$surface: #ffffff;
+$sand: #e3e9e3; // bloques suaves
+$line: #d3dbd4; // bordes
 
 // Texto
-$ink: #16201b; // texto principal
-$ink-soft: #46524b; // texto secundario
-$ink-muted: #7d8882; // terciario / labels
+$ink: #141b17; // grafito
+$ink-soft: #3f4b44;
+$ink-muted: #75817a;
 
-$overlay: rgba(#0d1411, 0.55);
+$overlay: rgba(#0c1410, 0.6);
 
 // Estados
-$success: #2f9e5f;
+$success: #2f8f5b;
 $warning: #d9a441;
 $info: #6a8caf;
 $danger: #c2554f;
