@@ -240,6 +240,18 @@ export interface DropiCatalogItem {
   imported: boolean
 }
 
+/** Estado de la conexión con la API de Dropi (GET /admin/dropi/status). */
+export interface DropiStatus {
+  configured: boolean
+  connected: boolean
+  message: string
+  // IP que Dropi reporta al rechazar: es la que hay que pedir que agreguen.
+  blockedIp: string | null
+  integrationUrl: string | null
+  urlMismatch: boolean
+  checkedAt: string
+}
+
 export interface Lead {
   _id: string
   phone: string
