@@ -387,6 +387,13 @@ export const checkoutCopy = {
   payphoneChange: 'Cambiar método de pago',
 }
 
+/** Aviso cuando se publica una versión nueva mientras la tienda está abierta. */
+export const updateCopy = {
+  title: 'Hay una nueva versión de Kova',
+  text: 'Actualiza para ver los últimos cambios.',
+  action: 'Actualizar',
+}
+
 export const paymentResponseCopy = {
   loadingTitle: 'Confirmando tu pago',
   loadingText: 'No cierres esta página, tarda unos segundos.',
