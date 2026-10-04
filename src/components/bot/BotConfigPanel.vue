@@ -58,6 +58,7 @@ onMounted(() => load())
           <li v-for="ep in config.endpoints" :key="ep.url" class="bcp__ep">
             <div class="bcp__ep-text">
               <p class="bcp__ep-name"><span class="bcp__method">{{ ep.method }}</span> {{ ep.name }}</p>
+              <p v-if="ep.use" class="bcp__use">{{ ep.use }}</p>
               <code class="bcp__url">{{ ep.url }}</code>
             </div>
             <AdminButton variant="soft" icon="fa-regular fa-copy" @click="copyText(ep.url)">{{ copy.copy }}</AdminButton>
@@ -184,6 +185,12 @@ onMounted(() => load())
     color: #fff;
     font-family: $font-mono;
     font-size: 0.64rem;
+  }
+
+  &__use {
+    margin-top: 0.15rem;
+    font-size: $text-xs;
+    color: $ink-soft;
   }
 
   &__url {
