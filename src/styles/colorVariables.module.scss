@@ -2,26 +2,33 @@
 // papel y acento, no de "rosa" o "gris 700".
 @use 'sass:color';
 
-// Acento de marca
+// Acento de marca: el verde salvia del logo
 $accent: #4f7560;
-$accent-deep: color.adjust($accent, $lightness: -12%);
+$accent-deep: #2f4a3b;
 $accent-soft: color.mix($accent, #ffffff, 14%);
+$silver: #c9cfcb; // el plateado del logo, para detalles
+
+// CTA de compra: cálido y opuesto al salvia para que el botón de comprar sea
+// lo primero que ve el ojo. Solo en acciones de compra, no decorativo.
+$cta: #e0662f;
+$cta-deep: #c4521f;
+$cta-soft: color.mix($cta, #ffffff, 12%);
 
 // Superficies
-$paper: #fdfcfa; // fondo base
+$paper: #f7f8f6; // fondo base, gris verdoso muy claro
 $surface: #ffffff; // superficies elevadas
-$sand: #f1ece6; // bloques suaves
-$line: #e7e1d9; // bordes
+$sand: #e9efea; // bloques suaves (salvia lavado)
+$line: #dde3de; // bordes
 
 // Texto
-$ink: #191423; // texto principal
-$ink-soft: #4a4552; // texto secundario
-$ink-muted: #8a8590; // terciario / labels
+$ink: #16201b; // texto principal
+$ink-soft: #46524b; // texto secundario
+$ink-muted: #7d8882; // terciario / labels
 
-$overlay: rgba(#100c14, 0.55);
+$overlay: rgba(#0d1411, 0.55);
 
 // Estados
-$success: #3bb77e;
+$success: #2f9e5f;
 $warning: #d9a441;
 $info: #6a8caf;
 $danger: #c2554f;
