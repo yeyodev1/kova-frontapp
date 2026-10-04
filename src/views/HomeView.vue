@@ -5,6 +5,7 @@ import { storeService } from '@/services/store.service'
 import HomeHero from '@/components/home/HomeHero.vue'
 import HowToBuy from '@/components/home/HowToBuy.vue'
 import ProductSection from '@/components/home/ProductSection.vue'
+import HomeFinalCta from '@/components/home/HomeFinalCta.vue'
 import GuaranteeStrip from '@/components/store/GuaranteeStrip.vue'
 import PaymentMethodsInfo from '@/components/store/PaymentMethodsInfo.vue'
 import SectionHeading from '@/components/store/SectionHeading.vue'
@@ -17,6 +18,8 @@ const popular = ref<Product[]>([])
 const loading = ref(true)
 
 const isEmpty = computed(() => !loading.value && !featured.value.length && !popular.value.length)
+// La vitrina del hero rota entre los primeros destacados.
+const showcase = computed(() => featured.value.slice(0, 4))
 
 async function load() {
   const [f, p] = await Promise.allSettled([
@@ -37,79 +40,89 @@ load()
 
 <template>
   <div class="home">
-    <HomeHero />
+    <HomeHero :products="showcase" :loading="loading" />
+
+    <div class="home__trust">
+      <GuaranteeStrip />
+    </div>
 
     <div class="home__body">
-      <GuaranteeStrip />
-
-      <ProductSection
-        :eyebrow="home.featured.eyebrow"
-        :title="home.featured.title"
-        :products="featured"
-        :loading="loading"
-        link="/tienda"
-      />
       <ProductSection
         :eyebrow="home.popular.eyebrow"
         :title="home.popular.title"
         :products="popular"
-        :loading="loading && !featured.length"
+        :loading="loading"
         link="/tienda?orden=popular"
+      />
+      <ProductSection
+        :eyebrow="home.featured.eyebrow"
+        :title="home.featured.title"
+        :products="featured"
+        :loading="loading && !popular.length"
+        link="/tienda"
       />
 
       <EmptyState v-if="isEmpty" icon="fa-solid fa-store" :title="home.empty.title" :text="home.empty.text">
         <a :href="whatsappLink()" class="btn btn--whatsapp" target="_blank" rel="noopener">
-          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp
         </a>
       </EmptyState>
+    </div>
 
-      <HowToBuy />
+    <HowToBuy />
+
+    <div class="home__body">
       <PaymentMethodsInfo />
 
-      <section>
-        <SectionHeading :eyebrow="home.faqs.eyebrow" :title="home.faqs.title" />
-        <FaqList :items="generalFaqs" />
+      <section class="home__faqs">
+        <SectionHeading :eyebrow="home.faqs.eyebrow" :title="home.faqs.title" class="home__faqs-head" />
+        <FaqList :items="generalFaqs" class="home__faqs-list" />
       </section>
     </div>
 
-    <section class="final">
-      <h2 class="final__title">{{ home.finalCta.title }}</h2>
-      <p class="final__text">{{ home.finalCta.text }}</p>
-      <RouterLink to="/tienda" class="btn btn--cta btn--lg">
-        {{ home.finalCta.cta }} <i class="fa-solid fa-arrow-right"></i>
-      </RouterLink>
-    </section>
+    <HomeFinalCta />
   </div>
 </template>
 
 <style scoped lang="scss">
 .home {
-  &__body {
-    @include container;
-    @include flex(column, stretch, flex-start, $space-xl);
-    padding-block: 1.5rem $space-xl;
+  &__trust {
+    @include container(1200px);
+    position: relative;
+    z-index: 2;
+    margin-top: -1.25rem;
 
     @include from('md') {
-      padding-top: 2.5rem;
+      margin-top: -2rem;
     }
   }
-}
 
-.final {
-  @include flex(column, center, center, 0.8rem);
-  text-align: center;
-  background: $sand;
-  padding: $space-xl 1.25rem;
-
-  &__title {
-    @include display($display-sm, 600);
-    max-width: 22ch;
+  &__body {
+    @include container(1200px);
+    @include flex(column, stretch, flex-start, $space-xl);
+    padding-block: $space-xl;
   }
 
-  &__text {
-    color: $ink-soft;
-    max-width: 48ch;
-    margin-bottom: 0.4rem;
+  &__faqs {
+    @include flex(column, stretch, flex-start);
+
+    @include from('lg') {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 3rem;
+    }
+  }
+
+  &__faqs-head {
+    @include from('lg') {
+      flex: 0 0 34%;
+      position: sticky;
+      top: 6rem;
+    }
+  }
+
+  &__faqs-list {
+    flex: 1;
   }
 }
 </style>
