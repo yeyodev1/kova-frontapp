@@ -95,8 +95,29 @@ export const home = {
   hero: {
     eyebrow: 'Envío a todo Ecuador',
     title: 'Gadgets útiles que te resuelven el día',
-    text: 'Productos prácticos para tu casa, tu carro y tu rutina. Pide en dos minutos y paga con tarjeta, transferencia o al recibir.',
+    // El titular entra línea por línea: cada elemento es una línea en móvil.
+    titleLines: ['Gadgets útiles', 'que te resuelven', 'el día.'],
+    text: 'Para tu casa, tu carro y tu rutina. Pide en dos minutos y, si prefieres, paga al recibir.',
     cta: 'Ver productos',
+    secondary: 'WhatsApp',
+  },
+  vitrine: {
+    label: 'En vitrina',
+    view: 'Ver producto',
+    prev: 'Producto anterior',
+    next: 'Producto siguiente',
+    goTo: (n: number) => `Ver destacado ${n}`,
+    fallbackTitle: 'La vitrina se está llenando',
+    fallbackText: 'Muy pronto verás aquí nuestros destacados.',
+  },
+  payments: {
+    eyebrow: 'Métodos de pago',
+  },
+  notFound: {
+    code: 'Error 404',
+    title: 'Aquí no hay nada en vitrina',
+    text: 'Puede que el enlace esté mal escrito o que la página se haya movido. Lo bueno está en la tienda.',
+    cta: 'Ir a la tienda',
     secondary: 'Escríbenos',
   },
   featured: {
@@ -228,6 +249,8 @@ export const cartCopy = {
   checkout: 'Finalizar compra',
   note: 'El envío y el método de pago se eligen en el siguiente paso.',
   remove: 'Quitar',
+  close: 'Cerrar carrito',
+  items: (n: number) => (n === 1 ? '1 producto' : `${n} productos`),
 }
 
 // ─── Checkout ───────────────────────────────────────────────────────────
@@ -406,11 +429,18 @@ export const layoutCopy = {
   openMenu: 'Abrir menú',
   closeMenu: 'Cerrar menú',
   whatsappFloat: 'Escríbenos por WhatsApp',
+  home: 'Kova, inicio',
+  menu: 'Menú',
+  closeSearch: 'Cerrar buscador',
   footer: {
     help: 'Ayuda',
     policies: 'Políticas',
     payments: 'Métodos de pago',
     contact: 'Contacto',
+    whatsappTitle: '¿Dudas antes de comprar?',
+    whatsappText: 'Te responde una persona real, antes y después de tu compra.',
+    country: 'Ecuador',
+    credit: 'Hecho por',
   },
 }
 
