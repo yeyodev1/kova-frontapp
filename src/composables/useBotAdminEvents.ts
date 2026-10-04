@@ -2,6 +2,7 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { botService } from '@/services/bot.service'
 import { botAdminCopy } from '@/config/site'
 import { errorMessage } from '@/composables/admin/format'
+import { normalizeEvent } from './useBotAdminShape'
 import type { BotEvent } from '@/types'
 
 const POLL_MS = 15000
@@ -42,7 +43,7 @@ export function useBotAdminEvents() {
     try {
       const data = await botService.events({ phone: phone.value.trim(), page: target, errors: onlyErrors.value })
       if (id !== requestId) return
-      items.value = data.items
+      items.value = data.items.map(normalizeEvent)
       page.value = data.page
       pages.value = data.pages
       total.value = data.total
