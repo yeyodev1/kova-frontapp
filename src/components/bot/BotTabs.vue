@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  tabs: { value: string; label: string; icon: string }[]
+  tabs: { value: string; label: string; short: string; icon: string }[]
   modelValue: string
   counts?: Record<string, number>
 }>()
@@ -22,7 +22,8 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
       @click="emit('update:modelValue', tab.value)"
     >
       <i :class="tab.icon" aria-hidden="true"></i>
-      <span>{{ tab.label }}</span>
+      <span class="btabs__label">{{ tab.label }}</span>
+      <span class="btabs__short" aria-hidden="true">{{ tab.short }}</span>
       <span v-if="counts?.[tab.value]" class="btabs__count">{{ counts[tab.value] }}</span>
     </button>
   </div>
@@ -40,9 +41,9 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
   &__tab {
     @include flex(row, center, center, 0.45rem);
     @include focus-ring;
-    flex: 1 0 auto;
+    flex: 1 1 auto;
     min-height: 2.6rem;
-    padding: 0.45rem 0.85rem;
+    padding: 0.45rem 0.6rem;
     border-radius: 11px;
     font-size: $text-sm;
     font-weight: 600;
@@ -72,6 +73,24 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
     }
   }
 
+  // En móvil caben las tres pestañas con el nombre corto; el largo queda para lectores de pantalla.
+  &__label {
+    @include until('sm') {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  &__short {
+    @include from('sm') {
+      display: none;
+    }
+  }
+
   &__count {
     min-width: 1.2rem;
     height: 1.2rem;
@@ -91,6 +110,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
     &__tab {
       flex: 0 0 auto;
+      padding-inline: 0.85rem;
     }
   }
 }
