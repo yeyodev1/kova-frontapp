@@ -1,12 +1,34 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import TheHeader from '@/layout/TheHeader.vue'
 import TheFooter from '@/layout/TheFooter.vue'
+import AnnouncementBar from '@/layout/AnnouncementBar.vue'
+import WhatsAppFloat from '@/layout/WhatsAppFloat.vue'
+import CartDrawer from '@/components/store/CartDrawer.vue'
 import ToastList from '@/components/ui/ToastList.vue'
+import { useStoreSettings } from '@/composables/useStoreSettings'
+import { captureUtm } from '@/composables/useUtm'
+
+const route = useRoute()
+const { load } = useStoreSettings()
+
+// La URL de entrada es la del anuncio: ahí vienen los utm_* y el fbclid.
+captureUtm()
+load()
+
+const chrome = computed(() => !route.meta.hideChrome)
+const isAdmin = computed(() => route.path.startsWith('/admin'))
+// Checkout no lleva chrome; en producto el botón sube para no tapar la barra de compra fija.
+const showWhatsapp = computed(() => chrome.value && !isAdmin.value)
 </script>
 
 <template>
   <div class="app">
-    <TheHeader />
+    <template v-if="chrome">
+      <AnnouncementBar />
+      <TheHeader />
+    </template>
     <main class="app__main">
       <RouterView v-slot="{ Component }">
         <Transition name="page" mode="out-in">
@@ -14,7 +36,9 @@ import ToastList from '@/components/ui/ToastList.vue'
         </Transition>
       </RouterView>
     </main>
-    <TheFooter />
+    <TheFooter v-if="chrome" />
+    <WhatsAppFloat v-if="showWhatsapp" :raised="route.name === 'Product'" />
+    <CartDrawer v-if="!isAdmin" />
     <ToastList />
   </div>
 </template>
