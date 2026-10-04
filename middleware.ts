@@ -10,7 +10,8 @@
  * Ante cualquier falla (API caída, lenta o producto inexistente) se deja pasar
  * la petición: el rewrite SPA de vercel.json sirve el index de siempre.
  */
-import { injectMeta, type MetaProduct } from './seo/injectMeta'
+// Con extensión .js: en el runtime Node la middleware se carga como ESM sin empaquetar.
+import { injectMeta, type MetaProduct } from './seo/injectMeta.js'
 
 export const config = {
   matcher: '/producto/:path*',
@@ -36,16 +37,20 @@ async function fetchProduct(slug: string): Promise<MetaProduct | null> {
 
 async function fetchIndex(request: Request): Promise<string | null> {
   // /index.html no entra en el matcher: esta petición no vuelve a pasar por acá.
-  // La cookie va para que funcione también en previews con protección.
+  // Cookie y bypass van para que funcione también en previews con protección.
   const headers: Record<string, string> = {}
-  const cookie = request.headers.get('cookie')
-  if (cookie) headers.cookie = cookie
+  for (const name of ['cookie', 'x-vercel-protection-bypass']) {
+    const value = request.headers.get(name)
+    if (value) headers[name] = value
+  }
   const res = await fetch(new URL('/index.html', request.url), {
     headers,
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
   })
   if (!res.ok) return null
-  return res.text()
+  const html = await res.text()
+  // Con protección de Vercel llega su página de login con 200: solo se toca el index de la SPA.
+  return html.includes('<div id="app">') ? html : null
 }
 
 export default async function middleware(request: Request): Promise<Response> {
