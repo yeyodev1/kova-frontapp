@@ -405,3 +405,22 @@ export interface BotConfig {
   flows: BotFlow[]
   rules: BotRule[]
 }
+
+// ─── Pedidos por gestionar ──────────────────────────────────────────────
+
+/** Por dónde entró el pedido. */
+export type OrderChannel = 'web' | 'whatsapp_bot'
+
+/** Qué le toca al equipo con el pedido; lo calcula el backend en la lista del panel. */
+export type OrderTodo = 'dropi' | 'receipt' | 'guide'
+
+// Fusión de interfaces: amplía `Order` y `DashboardStats` de arriba sin reescribirlas.
+export interface Order {
+  channel?: OrderChannel
+  todo?: OrderTodo | null
+}
+
+export interface DashboardStats {
+  /** Pedidos por gestionar: badge del menú Pedidos. */
+  todoCount?: number
+}
