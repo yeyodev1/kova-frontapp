@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AdminPageHead from '@/components/admin/AdminPageHead.vue'
 import AdminChips from '@/components/admin/AdminChips.vue'
 import AdminSkeleton from '@/components/admin/AdminSkeleton.vue'
@@ -8,13 +7,12 @@ import AdminEmpty from '@/components/admin/AdminEmpty.vue'
 import AdminPager from '@/components/admin/AdminPager.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import ProductRow from '@/components/admin/ProductRow.vue'
-import ProductCreateForm from '@/components/admin/ProductCreateForm.vue'
 import { useProductsList } from '@/composables/admin/useProductsList'
 
 const { filters, items, total, pages, loading, error, toggling, load, goTo, toggle } = useProductsList()
 
-// ?nuevo=1 llega desde el acceso rápido del panel.
-const creating = ref(useRoute().query.nuevo === '1')
+// ?nuevo=1 era el acceso del panel al formulario viejo: ahora lleva a "Subir producto".
+if (useRoute().query.nuevo === '1') useRouter().replace('/admin/productos/nuevo')
 
 const publishedOptions = [
   { value: '', label: 'Todos' },
@@ -27,10 +25,13 @@ const publishedOptions = [
   <div class="products">
     <AdminPageHead title="Productos" :subtitle="loading ? 'Cargando…' : `${total} productos`">
       <AdminButton icon="fa-solid fa-cloud-arrow-down" to="/admin/dropi">Importar de Dropi</AdminButton>
-      <AdminButton variant="primary" icon="fa-solid fa-plus" @click="creating = !creating">Crear producto</AdminButton>
+      <AdminButton variant="primary" icon="fa-solid fa-camera" to="/admin/productos/nuevo">Subir producto</AdminButton>
     </AdminPageHead>
 
-    <ProductCreateForm v-model:open="creating" />
+    <RouterLink to="/admin/productos/nuevo" class="products__fab" aria-label="Subir producto">
+      <i class="fa-solid fa-plus"></i>
+      <span>Subir producto</span>
+    </RouterLink>
 
     <div class="products__filters">
       <label class="products__search">
@@ -51,9 +52,9 @@ const publishedOptions = [
       v-else-if="!items.length"
       icon="fa-solid fa-box-open"
       title="No hay productos"
-      text="Crea uno a mano con su ID de Dropi o impórtalo del catálogo para empezar a vender."
+      text="Súbelo con fotos desde el celular o impórtalo del catálogo de Dropi para empezar a vender."
     >
-      <AdminButton variant="primary" icon="fa-solid fa-plus" @click="creating = true">Crear producto</AdminButton>
+      <AdminButton variant="primary" icon="fa-solid fa-camera" to="/admin/productos/nuevo">Subir producto</AdminButton>
       <AdminButton icon="fa-solid fa-cloud-arrow-down" to="/admin/dropi">Importar de Dropi</AdminButton>
     </AdminEmpty>
 
@@ -78,6 +79,39 @@ const publishedOptions = [
 
 <style scoped lang="scss">
 .products {
+  // Espacio para que el botón flotante no tape la última fila.
+  padding-bottom: 4.5rem;
+
+  @include from('md') {
+    padding-bottom: 0;
+  }
+
+  // Botón flotante en móvil: subir un producto es lo más frecuente aquí y el encabezado queda arriba.
+  &__fab {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(64px + env(safe-area-inset-bottom) + 0.9rem);
+    z-index: 30;
+    @include flex(row, center, center, 0.5rem);
+    min-height: 52px;
+    padding: 0 1.2rem;
+    border-radius: $radius-pill;
+    background: $accent-deep;
+    color: $surface;
+    font-weight: 700;
+    box-shadow: $shadow-lg;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform $dur-fast $ease-out;
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    @include from('md') {
+      display: none;
+    }
+  }
+
   &__filters {
     @include flex(column, stretch, flex-start, 0.6rem);
     margin-bottom: 1rem;
