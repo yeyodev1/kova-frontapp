@@ -36,9 +36,9 @@ const current = computed(() => orderTimeline.findIndex((step) => step.statuses.i
   &__alert {
     @include flex(row, center, flex-start, 0.5rem);
     padding: 0.9rem 1rem;
-    border-radius: $radius-sm;
+    border-radius: 14px;
     background: $danger-bg;
-    color: $danger;
+    color: darken($danger, 6%);
     font-weight: 600;
   }
 
@@ -49,40 +49,46 @@ const current = computed(() => orderTimeline.findIndex((step) => step.statuses.i
 
   &__step {
     position: relative;
-    @include flex(row, center, flex-start, 0.8rem);
-    padding-bottom: 1.1rem;
+    @include flex(row, center, flex-start, 0.85rem);
+    padding-bottom: 1.25rem;
     color: $ink-muted;
 
     // Línea vertical que une los pasos
     &:not(:last-child)::after {
       content: '';
       position: absolute;
-      left: 0.7rem;
-      top: 1.5rem;
-      bottom: 0.1rem;
+      left: 0.8rem;
+      top: 1.75rem;
+      bottom: 0.15rem;
       width: 2px;
+      margin-left: -1px;
       background: $line;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
     }
 
     &--done {
       color: $ink-soft;
 
       &::after {
-        background: $accent !important;
+        background: $sage !important;
       }
     }
 
     &--current {
       color: $ink;
-      font-weight: 600;
+      font-weight: 700;
     }
   }
 
   &__dot {
+    position: relative;
     @include flex(row, center, center);
     flex-shrink: 0;
-    width: 1.45rem;
-    height: 1.45rem;
+    width: 1.6rem;
+    height: 1.6rem;
     border-radius: 50%;
     border: 2px solid $line;
     background: $surface;
@@ -91,17 +97,44 @@ const current = computed(() => orderTimeline.findIndex((step) => step.statuses.i
   }
 
   &__step--done &__dot {
-    background: $accent;
-    border-color: $accent;
+    background: $sage;
+    border-color: $sage;
   }
 
   &__step--current &__dot {
-    border-color: $cta;
-    box-shadow: 0 0 0 4px $cta-soft;
+    border-color: $accent;
+    background: $accent;
+
+    // Pulso lento: el paso en el que está tu pedido ahora mismo.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      background: $accent;
+      animation: tl-pulse 2s $ease-out infinite;
+    }
   }
 
   &__label {
-    font-size: $text-sm;
+    font-size: $text-base;
+  }
+}
+
+@keyframes tl-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+@include reduced-motion {
+  .tl__step--current .tl__dot::before {
+    display: none;
   }
 }
 </style>
