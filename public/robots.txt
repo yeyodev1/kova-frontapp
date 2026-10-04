@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /pedido/
+Disallow: /pago/
 
 Sitemap: https://kovashopper.com/sitemap.xml
