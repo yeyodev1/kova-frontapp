@@ -4,7 +4,10 @@ defineProps<{ icon?: string; title: string; text?: string }>()
 
 <template>
   <div class="empty">
-    <span class="empty__icon"><i :class="icon || 'fa-solid fa-box-open'" aria-hidden="true"></i></span>
+    <div class="empty__display" aria-hidden="true">
+      <span class="empty__plinth"><i :class="icon || 'fa-solid fa-box-open'"></i></span>
+      <span class="empty__base"></span>
+    </div>
     <h2 class="empty__title">{{ title }}</h2>
     <p v-if="text" class="empty__text">{{ text }}</p>
     <div class="empty__actions"><slot /></div>
@@ -17,30 +20,57 @@ defineProps<{ icon?: string; title: string; text?: string }>()
   text-align: center;
   padding: $space-lg 1rem;
 
-  &__icon {
+  &__display {
+    @include flex(column, center, flex-start);
+    margin-bottom: 0.9rem;
+    animation: rise 0.6s $ease-out both;
+  }
+
+  // Peana chica con el ícono flotando: el estado vacío también es vitrina.
+  &__plinth {
+    @include plinth(20px);
     @include flex(row, center, center);
-    width: 4rem;
-    height: 4rem;
-    border-radius: 50%;
-    background: $accent-soft;
-    color: $accent-deep;
-    font-size: 1.5rem;
-    margin-bottom: 0.4rem;
+    width: 5.5rem;
+    height: 5rem;
+    color: $accent;
+    font-size: 1.6rem;
+
+    i {
+      animation: float 3.2s ease-in-out infinite alternate;
+    }
+  }
+
+  &__base {
+    width: 4.6rem;
+    height: 8px;
+    border-radius: 0 0 8px 8px;
+    background: linear-gradient(180deg, $alu, $alu-dark);
   }
 
   &__title {
-    @include display($text-xl, 600);
+    @include display($text-xl, 780, 115%);
   }
 
   &__text {
     color: $ink-soft;
-    max-width: 42ch;
+    font-size: $text-sm;
+    max-width: 40ch;
   }
 
   &__actions {
     @include flex(row, center, center, 0.6rem);
     flex-wrap: wrap;
-    margin-top: 0.6rem;
+    margin-top: 0.8rem;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+@keyframes float {
+  to {
+    transform: translateY(-5px);
   }
 }
 </style>
