@@ -1,23 +1,39 @@
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { adminService } from '@/services/admin.service'
 import type { Order } from '@/types'
 import { errorMessage } from './format'
 
-/** Lista de pedidos con filtros reflejados en la URL: el "atrás" del celular vuelve al mismo filtro. */
+/** `status` además de los estados reales: "por gestionar" (por defecto) y "todos". */
+export const TODO = 'todo'
+export const ALL = 'all'
+
+/**
+ * Lista de pedidos con filtros reflejados en la URL: el "atrás" del celular vuelve al mismo filtro.
+ * Sin estado en la URL se abre en "Por gestionar"; "Todos" queda como `?status=all`.
+ */
 export function useOrdersList() {
   const route = useRoute()
   const router = useRouter()
 
-  const q = (key: string) => (typeof route.query[key] === 'string' ? (route.query[key] as string) : '')
+  const q = (key: string) =>
+    typeof route.query[key] === 'string' ? (route.query[key] as string) : ''
 
+  const dropiErrorLink = q('dropiError') === '1'
   const filters = reactive({
-    status: q('status'),
+    // El atajo de errores de Dropi muestra esos pedidos sin cruzarlos con "por gestionar".
+    status: q('status') || (dropiErrorLink ? ALL : TODO),
     paymentMethod: q('paymentMethod'),
     q: q('q'),
     page: Number(q('page')) || 1,
-    dropiError: q('dropiError') === '1',
+    dropiError: dropiErrorLink,
   })
+
+  const isTodo = computed(() => filters.status === TODO)
+  /** El estado real para el API y la exportación: vacío en "por gestionar" y "todos". */
+  const apiStatus = computed(() =>
+    filters.status === TODO || filters.status === ALL ? '' : filters.status,
+  )
 
   const items = ref<Order[]>([])
   const total = ref(0)
@@ -32,7 +48,8 @@ export function useOrdersList() {
     error.value = ''
     try {
       const data = await adminService.orders({
-        status: filters.status || undefined,
+        status: apiStatus.value || undefined,
+        todo: isTodo.value ? 1 : undefined,
         paymentMethod: filters.paymentMethod || undefined,
         q: filters.q.trim() || undefined,
         page: filters.page,
@@ -51,7 +68,7 @@ export function useOrdersList() {
 
   function syncUrl() {
     const query: Record<string, string> = {}
-    if (filters.status) query.status = filters.status
+    if (filters.status && filters.status !== TODO) query.status = filters.status
     if (filters.paymentMethod) query.paymentMethod = filters.paymentMethod
     if (filters.q.trim()) query.q = filters.q.trim()
     if (filters.dropiError) query.dropiError = '1'
@@ -92,5 +109,5 @@ export function useOrdersList() {
 
   onMounted(load)
 
-  return { filters, items, total, pages, loading, error, load, goTo }
+  return { filters, isTodo, apiStatus, items, total, pages, loading, error, load, goTo }
 }
