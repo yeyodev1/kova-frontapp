@@ -1,25 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminNav from '@/components/admin/AdminNav.vue'
+import AdminUserMenu from '@/components/admin/AdminUserMenu.vue'
+import AdminPasswordModal from '@/components/admin/AdminPasswordModal.vue'
+import AdminWeakPasswordBanner from '@/components/admin/AdminWeakPasswordBanner.vue'
 import { useAdminBadges } from '@/composables/admin/useAdminBadges'
 
 const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
 const { ordersBadge, refresh } = useAdminBadges()
 
 onMounted(refresh)
 // El badge de pedidos se refresca al moverse por el panel, sin polling.
 watch(() => route.name, refresh)
-
-const initial = computed(() => (userStore.user?.name || userStore.user?.email || 'A').charAt(0).toUpperCase())
-
-function logout() {
-  userStore.clear()
-  router.replace({ name: 'Login' })
-}
 </script>
 
 <template>
@@ -34,16 +27,7 @@ function logout() {
         <i class="fa-solid fa-store"></i> Ver tienda
         <i class="fa-solid fa-arrow-up-right-from-square admin__store-ext"></i>
       </a>
-      <div class="admin__user">
-        <span class="admin__avatar" aria-hidden="true">{{ initial }}</span>
-        <span class="admin__user-text">
-          <span class="admin__user-name">{{ userStore.user?.name || 'Admin' }}</span>
-          <span class="admin__user-mail">{{ userStore.user?.email }}</span>
-        </span>
-        <button class="admin__logout" aria-label="Salir" title="Salir" @click="logout">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
-      </div>
+      <AdminUserMenu variant="card" />
     </aside>
 
     <header class="admin__top">
@@ -55,13 +39,12 @@ function logout() {
         <a href="/" target="_blank" rel="noopener" class="admin__icon-btn" aria-label="Ver tienda">
           <i class="fa-solid fa-store"></i>
         </a>
-        <button class="admin__icon-btn" aria-label="Salir" @click="logout">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
+        <AdminUserMenu variant="compact" />
       </div>
     </header>
 
     <main class="admin__main">
+      <AdminWeakPasswordBanner />
       <RouterView v-slot="{ Component, route: view }">
         <Transition name="admin-view" mode="out-in">
           <component :is="Component" :key="view.path" />
@@ -72,6 +55,8 @@ function logout() {
     <div class="admin__bottom">
       <AdminNav variant="bottom" :badge="ordersBadge" />
     </div>
+
+    <AdminPasswordModal />
   </div>
 </template>
 
@@ -199,59 +184,6 @@ $bottom-h: 64px;
       margin-left: auto;
       font-size: 0.65rem;
       opacity: 0.6;
-    }
-
-    &__user {
-      @include flex(row, center, flex-start, 0.65rem);
-      padding: 0.7rem;
-      border-radius: 14px;
-      background: rgba(#fff, 0.06);
-      border: 1px solid rgba(#fff, 0.08);
-    }
-
-    &__avatar {
-      @include plinth(50%);
-      @include flex(row, center, center);
-      flex-shrink: 0;
-      width: 2.2rem;
-      height: 2.2rem;
-      font-family: $font-display;
-      font-weight: 800;
-      color: $accent-deep;
-    }
-
-    &__user-text {
-      @include flex(column, stretch, flex-start);
-      min-width: 0;
-      flex: 1;
-    }
-
-    &__user-name {
-      font-weight: 600;
-      font-size: $text-sm;
-      line-height: 1.3;
-    }
-
-    &__user-mail {
-      font-size: 0.7rem;
-      color: rgba(#fff, 0.55);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    &__logout {
-      flex-shrink: 0;
-      width: 2.2rem;
-      height: 2.2rem;
-      border-radius: 50%;
-      color: rgba(#fff, 0.7);
-      transition: background-color $dur $ease-out;
-
-      &:hover {
-        background: rgba($danger, 0.25);
-        color: #fff;
-      }
     }
 
     &__main {
