@@ -126,6 +126,9 @@ export interface OrderItem {
   quantity: number
   unitPrice: number
   total: number
+  /** Solo admin: ids de Dropi copiados al comprar. */
+  dropiId?: number | null
+  dropiVariationId?: number | null
 }
 
 export interface Quote {
@@ -190,6 +193,21 @@ export interface Order {
   }
   notes: string
   createdAt: string
+}
+
+/** Estados de envío que el admin marca a mano mientras no hay sincronización con Dropi. */
+export type ShippingStatus = 'shipped' | 'delivered' | 'returned'
+
+export interface DropiManualInput {
+  dropiOrderId?: number
+  guide?: string
+  carrier?: string
+}
+
+export interface ShippingInput {
+  guide?: string
+  carrier?: string
+  status?: ShippingStatus
 }
 
 export interface PayphoneConfig {
