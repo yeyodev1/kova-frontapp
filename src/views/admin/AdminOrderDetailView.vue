@@ -21,6 +21,7 @@ const {
   confirmCancel,
   load,
   run,
+  save,
   cancelOrder,
   canConfirmTransfer,
   canSendToDropi,
@@ -34,13 +35,22 @@ const {
   <div class="detail">
     <AdminSkeleton v-if="loading && !order" :rows="5" height="8rem" />
 
-    <AdminEmpty v-else-if="error && !order" icon="fa-solid fa-receipt" title="No se pudo cargar el pedido" :text="error">
+    <AdminEmpty
+      v-else-if="error && !order"
+      icon="fa-solid fa-receipt"
+      title="No se pudo cargar el pedido"
+      :text="error"
+    >
       <AdminButton variant="primary" @click="load">Reintentar</AdminButton>
       <AdminButton to="/admin/pedidos">Volver a pedidos</AdminButton>
     </AdminEmpty>
 
     <template v-else-if="order">
-      <AdminPageHead :title="`Pedido ${order.number}`" :subtitle="formatDateTime(order.createdAt)" back="/admin/pedidos">
+      <AdminPageHead
+        :title="`Pedido ${order.number}`"
+        :subtitle="formatDateTime(order.createdAt)"
+        back="/admin/pedidos"
+      >
         <AdminStatusChip :status="order.status" />
       </AdminPageHead>
 
@@ -59,8 +69,10 @@ const {
           <OrderDropiCard
             :order="order"
             :can-send="canSendToDropi"
-            :busy="busy === 'send-to-dropi'"
+            :busy="busy"
             @send="run('send-to-dropi')"
+            @manual="async (body, done) => done(await save('dropi-manual', body))"
+            @shipping="(body) => save('shipping', body)"
           />
           <OrderTimeline :events="timeline" />
           <AdminButton
