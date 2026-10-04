@@ -15,14 +15,17 @@ import type {
   StoreSettings,
 } from '@/types'
 
-/** Administrador y si recibe el correo cuando un cliente del bot pide asesor. */
+/** Administrador y qué avisos por correo recibe: pedidos y asesor del bot. */
 export interface TeamMember {
   _id: string
   name: string
   email: string
   isActive: boolean
+  notifyOrders: boolean
   notifyHumanRequests: boolean
 }
+
+export type TeamAlertsPatch = Partial<Pick<TeamMember, 'notifyOrders' | 'notifyHumanRequests'>>
 
 /** Panel de administración. Todas las rutas exigen sesión de admin. */
 class AdminService extends APIBase {
@@ -169,6 +172,7 @@ class AdminService extends APIBase {
     q?: string
     page?: number
     dropiError?: number
+    todo?: number
   }) {
     const { data } = await this.get<Paginated<Order>>('admin/orders', undefined, { params })
     return data
@@ -251,8 +255,8 @@ class AdminService extends APIBase {
     return data
   }
 
-  async setHumanAlerts(id: string, notifyHumanRequests: boolean): Promise<TeamMember> {
-    const { data } = await this.put<TeamMember>(`admin/team/${id}`, { notifyHumanRequests })
+  async setTeamAlerts(id: string, patch: TeamAlertsPatch): Promise<TeamMember> {
+    const { data } = await this.put<TeamMember>(`admin/team/${id}`, patch)
     return data
   }
 }
