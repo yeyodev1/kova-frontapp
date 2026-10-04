@@ -16,6 +16,7 @@ export function useOrdersList() {
     paymentMethod: q('paymentMethod'),
     q: q('q'),
     page: Number(q('page')) || 1,
+    dropiError: q('dropiError') === '1',
   })
 
   const items = ref<Order[]>([])
@@ -35,6 +36,7 @@ export function useOrdersList() {
         paymentMethod: filters.paymentMethod || undefined,
         q: filters.q.trim() || undefined,
         page: filters.page,
+        dropiError: filters.dropiError ? 1 : undefined,
       })
       if (mine !== seq) return
       items.value = data.items
@@ -52,6 +54,7 @@ export function useOrdersList() {
     if (filters.status) query.status = filters.status
     if (filters.paymentMethod) query.paymentMethod = filters.paymentMethod
     if (filters.q.trim()) query.q = filters.q.trim()
+    if (filters.dropiError) query.dropiError = '1'
     if (filters.page > 1) query.page = String(filters.page)
     router.replace({ query })
   }
@@ -72,6 +75,8 @@ export function useOrdersList() {
   watch(
     () => [filters.status, filters.paymentMethod],
     () => {
+      // Elegir otro filtro saca del atajo de errores de Dropi.
+      filters.dropiError = false
       filters.page = 1
       syncUrl()
       load()
