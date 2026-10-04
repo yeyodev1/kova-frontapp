@@ -36,10 +36,17 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Pedido recibido' },
   },
   {
-    path: '/pago/respuesta',
+    // URL de respuesta registrada en Payphone Developer: Payphone vuelve aquí con
+    // ?id=<transacción>&clientTransactionId=<nuestro id> después de cobrar.
+    path: '/pay-response',
     name: 'PaymentResponse',
     component: () => import('@/views/PaymentResponseView.vue'),
     meta: { title: 'Confirmando pago', hideChrome: true },
+  },
+  {
+    // Ruta anterior: se conserva por si quedó registrada así en Payphone.
+    path: '/pago/respuesta',
+    redirect: (to) => ({ path: '/pay-response', query: to.query }),
   },
   {
     path: '/rastrear',
