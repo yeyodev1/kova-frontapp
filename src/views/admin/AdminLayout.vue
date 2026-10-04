@@ -8,10 +8,10 @@ import AdminWeakPasswordBanner from '@/components/admin/AdminWeakPasswordBanner.
 import { useAdminBadges } from '@/composables/admin/useAdminBadges'
 
 const route = useRoute()
-const { ordersBadge, refresh } = useAdminBadges()
+const { badges, refresh } = useAdminBadges()
 
 onMounted(refresh)
-// El badge de pedidos se refresca al moverse por el panel, sin polling.
+// Los badges (pedidos e incidencias) se refrescan al moverse por el panel, sin polling.
 watch(() => route.name, refresh)
 </script>
 
@@ -22,7 +22,7 @@ watch(() => route.name, refresh)
         <span class="admin__logo"><img src="/logo.jpg" alt="Kova" width="40" height="40" /></span>
         <span class="admin__brand-text">Kova <small>Panel</small></span>
       </RouterLink>
-      <AdminNav variant="side" :badge="ordersBadge" />
+      <AdminNav variant="side" :badges="badges" />
       <a href="/" target="_blank" rel="noopener" class="admin__store">
         <i class="fa-solid fa-store"></i> Ver tienda
         <i class="fa-solid fa-arrow-up-right-from-square admin__store-ext"></i>
@@ -53,7 +53,7 @@ watch(() => route.name, refresh)
     </main>
 
     <div class="admin__bottom">
-      <AdminNav variant="bottom" :badge="ordersBadge" />
+      <AdminNav variant="bottom" :badges="badges" />
     </div>
 
     <AdminPasswordModal />
