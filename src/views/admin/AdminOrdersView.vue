@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AdminPageHead from '@/components/admin/AdminPageHead.vue'
 import AdminChips from '@/components/admin/AdminChips.vue'
 import AdminSkeleton from '@/components/admin/AdminSkeleton.vue'
@@ -10,6 +11,13 @@ import { methodLabels, statusLabels, statusOrder } from '@/components/admin/orde
 import { useOrdersList } from '@/composables/admin/useOrdersList'
 
 const { filters, items, total, pages, loading, error, load, goTo } = useOrdersList()
+
+const hasFilters = computed(() => !!(filters.q || filters.status || filters.paymentMethod || filters.dropiError))
+
+function clearFilters() {
+  Object.assign(filters, { q: '', status: '', paymentMethod: '', dropiError: false })
+  goTo(1)
+}
 
 const statusOptions = [{ value: '', label: 'Todos' }, ...statusOrder.map((s) => ({ value: s, label: statusLabels[s] }))]
 const methodOptions = [
@@ -44,8 +52,13 @@ const methodOptions = [
       v-else-if="!items.length"
       icon="fa-solid fa-receipt"
       title="Sin pedidos"
-      text="No hay pedidos con estos filtros."
-    />
+      :text="hasFilters ? 'No hay pedidos con estos filtros.' : 'Cuando entre el primer pedido lo verás aquí.'"
+    >
+      <AdminButton v-if="hasFilters" variant="primary" icon="fa-solid fa-filter-circle-xmark" @click="clearFilters">
+        Quitar filtros
+      </AdminButton>
+      <AdminButton v-else icon="fa-solid fa-box" to="/admin/productos">Revisar productos</AdminButton>
+    </AdminEmpty>
 
     <div v-else class="orders__list" :class="{ 'orders__list--busy': loading }">
       <OrderRow v-for="order in items" :key="order._id" :order="order" />
@@ -88,6 +101,8 @@ const methodOptions = [
       @include card;
       gap: 0;
       overflow: hidden;
+      border-radius: $radius-md;
+      box-shadow: $shadow-sm;
     }
 
     &--busy {
