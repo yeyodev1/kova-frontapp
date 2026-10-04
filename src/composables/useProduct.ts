@@ -55,7 +55,13 @@ export function useProduct() {
       const unit = offer.quantity === 1 ? base : offer.unitPrice
       const total = unit * offer.quantity
       const compareTotal = reference * offer.quantity
-      return { ...offer, unitPrice: unit, total, compareTotal, savings: Math.max(0, compareTotal - total) }
+      return {
+        ...offer,
+        unitPrice: unit,
+        total,
+        compareTotal,
+        savings: Math.max(0, compareTotal - total),
+      }
     })
   })
   const selectedOffer = computed(
@@ -137,6 +143,7 @@ export function useProduct() {
     isVariable,
     price,
     compareAt,
+    stock,
     inStock,
     lowStock,
     offers,
