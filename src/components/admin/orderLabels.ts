@@ -49,7 +49,7 @@ export const methodLabels: Record<PaymentMethod, string> = {
 
 export const methodIcons: Record<PaymentMethod, string> = {
   card: 'fa-solid fa-credit-card',
-  cod: 'fa-solid fa-hand-holding-dollar',
+  cod: 'fa-solid fa-truck-fast',
   transfer: 'fa-solid fa-building-columns',
 }
 
@@ -84,10 +84,20 @@ export const todoLabels: Record<OrderTodo, string> = {
   dropi: 'Pasar a Dropi',
   receipt: 'Revisar comprobante',
   guide: 'Pedir guía',
+  payment: 'Esperando pago del cliente',
+}
+
+/** Esperar el pago no es urgente como pasar a Dropi: se pinta distinto. */
+export const todoTones: Record<OrderTodo, Tone> = {
+  dropi: 'warning',
+  receipt: 'warning',
+  guide: 'warning',
+  payment: 'info',
 }
 
 export const todoIcons: Record<OrderTodo, string> = {
   dropi: 'fa-solid fa-truck-arrow-right',
   receipt: 'fa-solid fa-file-invoice-dollar',
   guide: 'fa-solid fa-barcode',
+  payment: 'fa-solid fa-hourglass-half',
 }
