@@ -15,6 +15,15 @@ import type {
   StoreSettings,
 } from '@/types'
 
+/** Administrador y si recibe el correo cuando un cliente del bot pide asesor. */
+export interface TeamMember {
+  _id: string
+  name: string
+  email: string
+  isActive: boolean
+  notifyHumanRequests: boolean
+}
+
 /** Panel de administración. Todas las rutas exigen sesión de admin. */
 class AdminService extends APIBase {
   async dashboard(): Promise<DashboardStats> {
@@ -233,6 +242,17 @@ class AdminService extends APIBase {
 
   async updateSettings(patch: Partial<StoreSettings>): Promise<StoreSettings> {
     const { data } = await this.put<StoreSettings>('admin/settings', patch)
+    return data
+  }
+
+  // ─── Equipo ─────────────────────────────────────────────
+  async team(): Promise<TeamMember[]> {
+    const { data } = await this.get<TeamMember[]>('admin/team')
+    return data
+  }
+
+  async setHumanAlerts(id: string, notifyHumanRequests: boolean): Promise<TeamMember> {
+    const { data } = await this.put<TeamMember>(`admin/team/${id}`, { notifyHumanRequests })
     return data
   }
 }
