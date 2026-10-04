@@ -1,17 +1,33 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Order } from '@/types'
 import AdminStatusChip from './AdminStatusChip.vue'
-import { methodIcons, methodLabels } from './orderLabels'
+import {
+  channelIcons,
+  channelLabels,
+  methodIcons,
+  methodLabels,
+  todoIcons,
+  todoLabels,
+} from './orderLabels'
 import { formatCents } from '@/utils/money'
 import { formatDateTime } from '@/composables/admin/format'
 
-defineProps<{ order: Order }>()
+const props = defineProps<{ order: Order }>()
+const channel = computed(() => props.order.channel ?? 'web')
 </script>
 
 <template>
   <RouterLink :to="`/admin/pedidos/${order._id}`" class="row">
     <div class="row__main">
       <p class="row__number">
+        <i
+          class="row__channel"
+          :class="[channelIcons[channel], `row__channel--${channel}`]"
+          :title="channelLabels[channel]"
+          aria-hidden="true"
+        ></i>
+        <span class="visually-hidden">{{ channelLabels[channel] }}:</span>
         {{ order.number }}
         <span v-if="order.dropi?.error" class="row__alert" :title="order.dropi.error">
           <i class="fa-solid fa-triangle-exclamation"></i> Dropi
@@ -22,6 +38,13 @@ defineProps<{ order: Order }>()
     <div class="row__customer">
       <p class="row__name">{{ order.customer.firstName }} {{ order.customer.lastName }}</p>
       <p class="row__meta">{{ order.customer.phone }} · {{ order.address?.city }}</p>
+      <AdminStatusChip
+        v-if="order.todo"
+        class="row__todo"
+        tone="warning"
+        :icon="todoIcons[order.todo]"
+        :label="todoLabels[order.todo]"
+      />
     </div>
     <div class="row__method">
       <i :class="methodIcons[order.paymentMethod]"></i>
@@ -71,6 +94,20 @@ defineProps<{ order: Order }>()
     font-size: $text-sm;
     font-weight: 700;
     letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  &__channel {
+    font-size: 0.85rem;
+    color: $ink-muted;
+
+    &--whatsapp_bot {
+      color: #1f9d55;
+    }
+  }
+
+  &__todo {
+    margin-top: 0.4rem;
   }
 
   &__total {
@@ -135,7 +172,7 @@ defineProps<{ order: Order }>()
     }
 
     &__main {
-      flex: 0 0 150px;
+      flex: 0 0 185px;
     }
 
     &__customer {
