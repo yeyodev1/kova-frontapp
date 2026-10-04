@@ -877,15 +877,15 @@ export const botAdminCopy = {
   title: 'Bot de WhatsApp',
   subtitle: 'Conversaciones, actividad paso a paso y configuración de BuilderBot.',
   tabs: [
-    { value: 'sessions', label: 'Conversaciones', icon: 'fa-solid fa-comments' },
-    { value: 'events', label: 'Actividad', icon: 'fa-solid fa-wave-square' },
-    { value: 'config', label: 'Configuración', icon: 'fa-solid fa-gear' },
+    { value: 'sessions', label: 'Conversaciones', short: 'Chats', icon: 'fa-solid fa-comments' },
+    { value: 'events', label: 'Actividad', short: 'Actividad', icon: 'fa-solid fa-wave-square' },
+    { value: 'config', label: 'Configuración', short: 'Config.', icon: 'fa-solid fa-gear' },
   ],
   refresh: 'Actualizar',
   retry: 'Reintentar',
   loadError: 'No se pudo cargar',
   sessions: {
-    search: 'Buscar por teléfono, nombre o KV-',
+    search: 'Teléfono, nombre o KV-',
     emptyTitle: 'Sin conversaciones',
     emptyText: 'Cuando alguien le escriba al bot, la conversación aparecerá aquí.',
     noName: 'Sin nombre',
@@ -926,7 +926,7 @@ export const botAdminCopy = {
     client: 'Cliente',
     bot: 'Bot',
     noMessage: '(sin texto)',
-    noReply: '(no respondió)',
+    noReply: '(sin respuesta)',
   },
   config: {
     status: 'Estado',
