@@ -8,6 +8,7 @@ import {
   methodIcons,
   methodLabels,
   todoIcons,
+  todoTones,
   todoLabels,
 } from './orderLabels'
 import { formatCents } from '@/utils/money'
@@ -15,6 +16,14 @@ import { formatDateTime } from '@/composables/admin/format'
 
 const props = defineProps<{ order: Order }>()
 const channel = computed(() => props.order.channel ?? 'web')
+// "1 × Almohada… +1 más": se reconoce el pedido sin abrirlo.
+const itemsSummary = computed(() => {
+  const items = props.order.items || []
+  const [head] = items
+  if (!head) return ''
+  const first = `${head.quantity} × ${head.title}`
+  return items.length > 1 ? `${first} +${items.length - 1} más` : first
+})
 </script>
 
 <template>
@@ -37,17 +46,21 @@ const channel = computed(() => props.order.channel ?? 'web')
     </div>
     <div class="row__customer">
       <p class="row__name">{{ order.customer.firstName }} {{ order.customer.lastName }}</p>
-      <p class="row__meta">{{ order.customer.phone }} · {{ order.address?.city }}</p>
+      <p class="row__meta">
+        <i class="fa-solid fa-phone" aria-hidden="true"></i> {{ order.customer.phone }}
+        <span v-if="order.address?.city"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> {{ order.address.city }}</span>
+      </p>
+      <p v-if="itemsSummary" class="row__items"><i class="fa-solid fa-box" aria-hidden="true"></i> {{ itemsSummary }}</p>
       <AdminStatusChip
         v-if="order.todo"
         class="row__todo"
-        tone="warning"
+        :tone="todoTones[order.todo]"
         :icon="todoIcons[order.todo]"
         :label="todoLabels[order.todo]"
       />
     </div>
-    <div class="row__method">
-      <i :class="methodIcons[order.paymentMethod]"></i>
+    <div class="row__method" :class="`row__method--${order.paymentMethod}`">
+      <i :class="methodIcons[order.paymentMethod]" aria-hidden="true"></i>
       {{ methodLabels[order.paymentMethod] ?? order.paymentMethod }}
     </div>
     <div class="row__end">
@@ -193,6 +206,62 @@ const channel = computed(() => props.order.channel ?? 'web')
       justify-content: flex-end;
       gap: 0.8rem;
     }
+  }
+}
+.row__meta {
+  @include flex(row, center, flex-start, 0.3rem 0.75rem);
+  flex-wrap: wrap;
+
+  i {
+    color: $ink-muted;
+    font-size: 0.75em;
+    margin-right: 0.15rem;
+  }
+}
+
+.row__items {
+  font-size: 0.8rem;
+  color: $ink-soft;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+
+  i {
+    color: $accent;
+    margin-right: 0.25rem;
+  }
+}
+
+// Método de pago como chip de color: se distingue de un vistazo.
+.row__method {
+  @include flex(row, center, flex-start, 0.4rem);
+  align-self: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  i {
+    color: inherit;
+    margin-right: 0;
+  }
+
+  &--card {
+    background: $success-bg;
+    color: $success;
+  }
+
+  &--transfer {
+    background: $info-bg;
+    color: $info;
+  }
+
+  &--cod {
+    background: $cta-soft;
+    color: $cta-deep;
   }
 }
 </style>
