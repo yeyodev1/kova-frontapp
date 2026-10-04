@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, reactive, toRef } from 'vue'
 import AdminPageHead from '@/components/admin/AdminPageHead.vue'
 import AdminChips from '@/components/admin/AdminChips.vue'
 import AdminSkeleton from '@/components/admin/AdminSkeleton.vue'
@@ -8,13 +8,33 @@ import AdminPager from '@/components/admin/AdminPager.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import OrderPickRow from '@/components/admin/orders/OrderPickRow.vue'
 import OrdersExportBar from '@/components/admin/orders/OrdersExportBar.vue'
+import OrdersTodoChip from '@/components/admin/orders/OrdersTodoChip.vue'
 import { methodLabels, statusLabels, statusOrder } from '@/components/admin/orderLabels'
-import { useOrdersList } from '@/composables/admin/useOrdersList'
+import { ALL, TODO, useOrdersList } from '@/composables/admin/useOrdersList'
 import { useOrdersExport } from '@/composables/admin/useOrdersExport'
+import { useAdminBadges } from '@/composables/admin/useAdminBadges'
 
-const { filters, items, total, pages, loading, error, load, goTo } = useOrdersList()
+const { filters, isTodo, apiStatus, items, total, pages, loading, error, load, goTo } =
+  useOrdersList()
+const { stats, refresh: refreshBadges } = useAdminBadges()
+// La exportación solo entiende estados reales: "por gestionar" y "todos" exportan lo pendiente de Dropi.
+const exportFilters = reactive({
+  status: apiStatus,
+  paymentMethod: toRef(filters, 'paymentMethod'),
+  q: toRef(filters, 'q'),
+})
 const { selecting, selected, count, exporting, toggle, selectAll, toggleSelecting, exportCsv } =
-  useOrdersExport(filters)
+  useOrdersExport(exportFilters)
+
+onMounted(refreshBadges)
+
+function reload() {
+  load()
+  refreshBadges()
+}
+
+const todoCount = computed(() => stats.value?.todoCount ?? 0)
+const allClear = computed(() => isTodo.value && !filters.q && !filters.paymentMethod)
 
 const pageIds = computed(() => items.value.map((o) => o._id))
 const pageAllChecked = computed(
@@ -22,16 +42,18 @@ const pageAllChecked = computed(
 )
 
 const hasFilters = computed(
-  () => !!(filters.q || filters.status || filters.paymentMethod || filters.dropiError),
+  () =>
+    !!(filters.q || filters.paymentMethod || filters.dropiError) ||
+    (filters.status !== ALL && !isTodo.value),
 )
 
 function clearFilters() {
-  Object.assign(filters, { q: '', status: '', paymentMethod: '', dropiError: false })
+  Object.assign(filters, { q: '', status: ALL, paymentMethod: '', dropiError: false })
   goTo(1)
 }
 
 const statusOptions = [
-  { value: '', label: 'Todos' },
+  { value: ALL, label: 'Todos' },
   ...statusOrder.map((s) => ({ value: s, label: statusLabels[s] })),
 ]
 const methodOptions = [
@@ -45,8 +67,11 @@ const methodOptions = [
 
 <template>
   <div class="orders">
-    <AdminPageHead title="Pedidos" :subtitle="loading ? 'Cargando…' : `${total} pedidos`">
-      <AdminButton icon="fa-solid fa-rotate" :loading="loading" @click="load"
+    <AdminPageHead
+      title="Pedidos"
+      :subtitle="loading ? 'Cargando…' : `${total} ${isTodo ? 'por gestionar' : 'pedidos'}`"
+    >
+      <AdminButton icon="fa-solid fa-rotate" :loading="loading" @click="reload"
         >Actualizar</AdminButton
       >
     </AdminPageHead>
@@ -57,12 +82,21 @@ const methodOptions = [
         <span class="visually-hidden">Buscar pedidos</span>
         <input v-model="filters.q" type="search" placeholder="Número, nombre o celular" />
       </label>
-      <AdminChips v-model="filters.status" :options="statusOptions" label="Estado" />
+      <div class="orders__status">
+        <OrdersTodoChip :active="isTodo" :count="todoCount" @select="filters.status = TODO" />
+        <AdminChips
+          class="orders__chips"
+          :model-value="isTodo ? '' : filters.status"
+          :options="statusOptions"
+          label="Estado"
+          @update:model-value="(value: string) => (filters.status = value)"
+        />
+      </div>
       <AdminChips v-model="filters.paymentMethod" :options="methodOptions" label="Método de pago" />
     </div>
 
     <OrdersExportBar
-      :status="filters.status"
+      :status="apiStatus"
       :selecting="selecting"
       :count="count"
       :exporting="exporting"
@@ -81,6 +115,17 @@ const methodOptions = [
       :text="error"
     >
       <AdminButton variant="primary" @click="load">Reintentar</AdminButton>
+    </AdminEmpty>
+
+    <AdminEmpty
+      v-else-if="!items.length && allClear"
+      icon="fa-solid fa-circle-check"
+      title="Todo al día"
+      text="No hay pedidos esperando una acción del equipo."
+    >
+      <AdminButton icon="fa-solid fa-receipt" @click="filters.status = ALL"
+        >Ver todos los pedidos</AdminButton
+      >
     </AdminEmpty>
 
     <AdminEmpty
@@ -126,6 +171,16 @@ const methodOptions = [
   &__filters {
     @include flex(column, stretch, flex-start, 0.6rem);
     margin-bottom: 1rem;
+  }
+
+  &__status {
+    @include flex(row, flex-start, flex-start, 0.4rem);
+    min-width: 0;
+  }
+
+  &__chips {
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   &__search {
