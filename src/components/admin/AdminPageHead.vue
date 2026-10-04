@@ -29,20 +29,38 @@ defineProps<{ title: string; subtitle?: string; back?: string }>()
   }
 
   &__back {
+    @include flex(row, center, flex-start, 0.4rem);
+    display: inline-flex;
     font-size: $text-sm;
+    font-weight: 600;
     color: $ink-muted;
-    display: inline-block;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
+    transition: color $dur $ease-out;
+
+    i {
+      transition: transform $dur $ease-out;
+    }
+
+    &:hover {
+      color: $accent;
+
+      i {
+        transform: translateX(-3px);
+      }
+    }
   }
 
   &__title {
-    @include display($text-xl, 600);
+    @include display(clamp(1.5rem, 1.2rem + 1.4vw, 2.1rem), 800, 116%);
+    overflow-wrap: anywhere;
   }
 
   &__subtitle {
-    font-size: $text-sm;
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
     color: $ink-muted;
-    margin-top: 0.2rem;
+    margin-top: 0.35rem;
   }
 
   &__actions {
