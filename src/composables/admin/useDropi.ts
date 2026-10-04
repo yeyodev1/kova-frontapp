@@ -3,6 +3,7 @@ import { adminService } from '@/services/admin.service'
 import { useToastStore } from '@/stores/toast'
 import type { DropiCatalogItem } from '@/types'
 import { errorMessage, errorStatus } from './format'
+import { useDropiStatus } from './useDropiStatus'
 
 export type SyncKind = 'products' | 'locations' | 'orders'
 
@@ -10,6 +11,7 @@ const LIMIT = 24
 
 export function useDropi() {
   const toast = useToastStore()
+  const dropiStatus = useDropiStatus()
 
   const q = ref('')
   const page = ref(1)
@@ -36,7 +38,11 @@ export function useDropi() {
     loading.value = true
     error.value = ''
     try {
-      const data = await adminService.dropiCatalog({ q: q.value.trim() || undefined, page: p, limit: LIMIT })
+      const data = await adminService.dropiCatalog({
+        q: q.value.trim() || undefined,
+        page: p,
+        limit: LIMIT,
+      })
       items.value = data.items
       total.value = data.total
       missingToken.value = false
@@ -87,9 +93,19 @@ export function useDropi() {
 
   const pages = () => Math.max(1, Math.ceil(total.value / LIMIT))
 
+  // Sin acceso a Dropi el buscador no se consulta: el panel explica el bloqueo en vez de mostrar errores.
+  async function checkAndSearch(refresh = false) {
+    await dropiStatus.check(refresh)
+    if (dropiStatus.connected.value) {
+      if (!items.value.length) await search(page.value)
+    } else {
+      missingToken.value = dropiStatus.status.value?.configured === false
+    }
+  }
+
   onMounted(() => {
     loadMarkup()
-    search(1)
+    checkAndSearch()
   })
 
   return {
@@ -109,5 +125,7 @@ export function useDropi() {
     search,
     importItem,
     sync,
+    dropiStatus,
+    retryConnection: () => checkAndSearch(true),
   }
 }
