@@ -15,14 +15,17 @@ import { formatCents } from '@/utils/format'
 const props = defineProps<{ total: number; inStock: boolean; title: string }>()
 const emit = defineEmits<{ buy: []; add: [] }>()
 
-const methods: PaymentMethod[] = ['card', 'transfer', 'cod']
-const { settings } = useStoreSettings()
+const { settings, acceptTransfers } = useStoreSettings()
+// Transferencia solo si el panel la tiene encendida.
+const methods = computed<PaymentMethod[]>(() =>
+  acceptTransfers.value ? ['card', 'transfer', 'cod'] : ['card', 'cod'],
+)
 
 // Precio final por forma de pago: la tarjeta queda como la opción que más conviene,
 // con lo que se ahorra frente a contra entrega bien visible.
 function surcharge(m: PaymentMethod): number {
   if (m === 'cod') return settings.value?.codSurcharge ?? 0
-  if (m === 'transfer') return settings.value?.transferSurcharge ?? 0
+  if (m === 'transfer') return acceptTransfers.value ? (settings.value?.transferSurcharge ?? 0) : 0
   return 0
 }
 const savings = computed(() => Math.max(surcharge('cod'), surcharge('transfer')))
