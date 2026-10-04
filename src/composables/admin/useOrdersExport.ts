@@ -74,7 +74,13 @@ export function useOrdersExport(filters: ExportFilters) {
         return
       }
       download(blob, filename)
-      toast.success(rows > 0 ? `Exportados ${rows} pedidos` : 'Archivo descargado')
+      toast.success(
+        rows === 1
+          ? 'Exportado 1 pedido'
+          : rows > 0
+            ? `Exportados ${rows} pedidos`
+            : 'Archivo descargado',
+      )
     } catch (e) {
       toast.error(errorMessage(e, 'No se pudo exportar'))
     } finally {
