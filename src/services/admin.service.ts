@@ -2,6 +2,7 @@ import APIBase from './httpBase'
 import type {
   DashboardStats,
   DropiCatalogItem,
+  DropiStatus,
   Lead,
   Order,
   Paginated,
@@ -26,10 +27,24 @@ class AdminService extends APIBase {
     return data
   }
 
-  async importFromDropi(dropiId: number, markupPercent?: number): Promise<Product> {
+  /** Una llamada liviana a Dropi, cacheada 60 s en el backend; `refresh` la salta. */
+  async dropiStatus(refresh = false): Promise<DropiStatus> {
+    const { data } = await this.get<DropiStatus>('admin/dropi/status', undefined, {
+      params: refresh ? { refresh: 1 } : undefined,
+      timeout: 30000,
+    })
+    return data
+  }
+
+  /** Acepta el id de Dropi o un link de producto: el backend extrae el id del link. */
+  async importFromDropi(ref: number | string, markupPercent?: number): Promise<Product> {
+    const body =
+      typeof ref === 'number' || /^\d+$/.test(ref.trim())
+        ? { dropiId: Number(ref) }
+        : { url: ref.trim() }
     const { data } = await this.post<Product>(
       'admin/dropi/import',
-      { dropiId, markupPercent },
+      { ...body, markupPercent },
       undefined,
       { timeout: 30000 },
     )
@@ -37,9 +52,14 @@ class AdminService extends APIBase {
   }
 
   async syncDropi(what: 'products' | 'locations' | 'orders'): Promise<Record<string, unknown>> {
-    const { data } = await this.post<Record<string, unknown>>(`admin/dropi/sync-${what}`, {}, undefined, {
-      timeout: 60000,
-    })
+    const { data } = await this.post<Record<string, unknown>>(
+      `admin/dropi/sync-${what}`,
+      {},
+      undefined,
+      {
+        timeout: 60000,
+      },
+    )
     return data
   }
 
@@ -67,6 +87,14 @@ class AdminService extends APIBase {
 
   async deleteProduct(id: string): Promise<void> {
     await this.delete(`admin/products/${id}`)
+  }
+
+  /** Trae de Dropi stock, costo y variantes nuevas de un producto enlazado. */
+  async syncProductFromDropi(id: string): Promise<Product> {
+    const { data } = await this.post<Product>(`admin/products/${id}/sync-dropi`, {}, undefined, {
+      timeout: 30000,
+    })
+    return data
   }
 
   async uploadProductImage(id: string, file: File): Promise<Product> {
