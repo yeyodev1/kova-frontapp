@@ -1,14 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { checkoutCopy } from '@/config/site'
 import { formatCents } from '@/utils/format'
+import { useStoreSettings } from '@/composables/useStoreSettings'
 import CheckoutSection from './CheckoutSection.vue'
+import TransferBankChoice from './TransferBankChoice.vue'
 import type { PaymentMethod, Quote } from '@/types'
 
-defineProps<{ modelValue: PaymentMethod; quote: Quote | null; disabled?: boolean }>()
+const props = defineProps<{ modelValue: PaymentMethod; quote: Quote | null; disabled?: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: PaymentMethod] }>()
+const bank = defineModel<string>('bank', { default: '' })
 
+const { acceptTransfers, bankAccounts } = useStoreSettings()
 // Tarjeta primero: es el precio más bajo y el que más le conviene al cliente.
-const order: PaymentMethod[] = ['card', 'transfer', 'cod']
+// Transferencia solo si el panel la tiene encendida (y el quote no dice lo contrario).
+const order = computed<PaymentMethod[]>(() =>
+  (['card', 'transfer', 'cod'] as PaymentMethod[]).filter(
+    (method) => method !== 'transfer' || (acceptTransfers.value && props.quote?.available?.transfer !== false),
+  ),
+)
 const m = checkoutCopy.methods
 </script>
 
@@ -52,6 +62,7 @@ const m = checkoutCopy.methods
           </Transition>
         </span>
       </label>
+      <TransferBankChoice v-if="modelValue === 'transfer' && bankAccounts.length > 1" v-model="bank" :accounts="bankAccounts" />
     </div>
   </CheckoutSection>
 </template>
