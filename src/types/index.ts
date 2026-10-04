@@ -326,3 +326,76 @@ export interface DropiLinkedProduct {
   title: string
   isPublished: boolean
 }
+
+// ─── Link de pago del bot (GET /orders/pay/:token) ──────────────────────
+
+export interface PayOrderResponse {
+  order: Order
+  paid: boolean
+  payphone?: PayphoneConfig
+}
+
+// ─── Bot de WhatsApp (panel /admin/bot) ─────────────────────────────────
+
+/** Un paso de la bitácora: lo que entró por un endpoint y lo que respondió el bot. */
+export interface BotEvent {
+  _id: string
+  createdAt: string
+  phone: string
+  endpoint: string
+  route: string
+  decision: string
+  message: string
+  reply: string
+  ms: number
+  error: string
+}
+
+export interface BotCartLine {
+  name: string
+  quantity: number
+  price: number
+}
+
+export interface BotSession {
+  phone: string
+  name: string
+  step: string
+  cart: BotCartLine[]
+  orderNumber: string
+  silencedUntil: string | null
+  optOut: boolean
+  lastMessageAt: string | null
+  lastMessage: string
+  humanRequested: boolean
+}
+
+export interface BotEndpoint {
+  name: string
+  method: string
+  url: string
+}
+
+export interface BotFlow {
+  name: string
+  event: string
+  endpoint: string
+  sendToClient: string
+  after: string
+}
+
+export interface BotRule {
+  route: string
+  goesTo: string
+  when: string
+}
+
+export interface BotConfig {
+  botName: string
+  aiEnabled: boolean
+  aiVoice: boolean
+  secretRequired: boolean
+  endpoints: BotEndpoint[]
+  flows: BotFlow[]
+  rules: BotRule[]
+}
