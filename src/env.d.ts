@@ -28,6 +28,9 @@ interface PPaymentButtonBoxOptions {
   email?: string
   phoneNumber?: string
   documentId?: string
+  // 1 = cédula, 2 = RUC, 3 = pasaporte
+  identificationType?: number
+  optionalParameter?: string
 }
 
 declare class PPaymentButtonBox {
