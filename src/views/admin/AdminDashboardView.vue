@@ -63,7 +63,7 @@ const shortcuts = [
           :value="stats.dropiErrors"
           icon="fa-solid fa-triangle-exclamation"
           :tone="stats.dropiErrors ? 'danger' : 'accent'"
-          to="/admin/pedidos?status=confirmed"
+          to="/admin/pedidos?dropiError=1"
         />
       </div>
 
