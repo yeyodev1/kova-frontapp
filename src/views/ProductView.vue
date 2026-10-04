@@ -11,11 +11,11 @@ import ProductActions from '@/components/product/ProductActions.vue'
 import ProductDetails from '@/components/product/ProductDetails.vue'
 import StickyBuyBar from '@/components/product/StickyBuyBar.vue'
 import ProductSkeleton from '@/components/product/ProductSkeleton.vue'
+import ProductNotFound from '@/components/product/ProductNotFound.vue'
 import QuantityStepper from '@/components/store/QuantityStepper.vue'
 import PaymentMethodsInfo from '@/components/store/PaymentMethodsInfo.vue'
 import SectionHeading from '@/components/store/SectionHeading.vue'
 import ProductGrid from '@/components/store/ProductGrid.vue'
-import EmptyState from '@/components/store/EmptyState.vue'
 
 const {
   product,
@@ -26,6 +26,7 @@ const {
   isVariable,
   price,
   compareAt,
+  stock,
   inStock,
   lowStock,
   offers,
@@ -42,13 +43,13 @@ const { visible: stickyVisible } = useStickyCta(ctaEl)
   <div class="product">
     <ProductSkeleton v-if="loading" />
 
-    <EmptyState v-else-if="notFound || !product" icon="fa-solid fa-box-open" :title="productCopy.notFoundTitle" :text="productCopy.notFoundText">
-      <RouterLink to="/tienda" class="btn btn--primary">Ver productos</RouterLink>
-    </EmptyState>
+    <ProductNotFound v-else-if="notFound || !product" />
 
     <template v-else>
       <div class="product__top">
-        <ProductGallery :images="product.images" :title="product.title" class="product__gallery" />
+        <div class="product__gallery">
+          <ProductGallery :images="product.images" :title="product.title" />
+        </div>
 
         <div class="product__buy">
           <ProductSummary
@@ -57,29 +58,47 @@ const { visible: stickyVisible } = useStickyCta(ctaEl)
             :compare-at="compareAt"
             :in-stock="inStock"
             :low-stock="lowStock"
+            :stock="stock"
+            class="product__step"
           />
 
-          <VariantPicker v-if="isVariable" v-model="variantId" :variants="product.variants" />
+          <VariantPicker
+            v-if="isVariable"
+            v-model="variantId"
+            :variants="product.variants"
+            class="product__step"
+          />
 
-          <OfferPicker v-if="offers.length > 1" v-model="quantity" :offers="offers" />
-          <div v-else class="product__qty">
-            <span>Cantidad</span>
+          <OfferPicker
+            v-if="inStock && offers.length > 1"
+            v-model="quantity"
+            :offers="offers"
+            class="product__step"
+          />
+          <div v-else-if="inStock" class="product__qty product__step">
+            <span>{{ productCopy.quantityTitle }}</span>
             <QuantityStepper v-model="quantity" :min="1" :max="10" />
           </div>
 
-          <div ref="ctaEl">
-            <ProductActions :total="total" :in-stock="inStock" :title="product.title" @buy="buyNow" @add="addToCart" />
+          <div ref="ctaEl" class="product__step">
+            <ProductActions
+              :total="total"
+              :in-stock="inStock"
+              :title="product.title"
+              @buy="buyNow"
+              @add="addToCart"
+            />
           </div>
         </div>
       </div>
 
       <div class="product__more">
         <ProductDetails :product="product" class="product__details" />
-        <PaymentMethodsInfo compact class="product__payments" />
+        <PaymentMethodsInfo v-reveal compact class="product__payments" />
       </div>
 
       <section v-if="product.related?.length" class="product__related">
-        <SectionHeading :title="productCopy.relatedTitle" />
+        <SectionHeading :eyebrow="productCopy.relatedEyebrow" :title="productCopy.relatedTitle" />
         <ProductGrid :products="product.related" />
       </section>
 
@@ -98,52 +117,89 @@ const { visible: stickyVisible } = useStickyCta(ctaEl)
 <style scoped lang="scss">
 .product {
   @include container;
-  padding-block: 0 calc(#{$space-xl} + 4rem);
+  padding-block: 0 calc(#{$space-xl} + 4.5rem);
 
   @include from('md') {
-    padding-block: 2rem $space-xl;
+    padding-top: 1.5rem;
+  }
+
+  @include from('lg') {
+    padding-block: 2.5rem $space-xl;
   }
 
   &__top {
-    @include flex(column, stretch, flex-start, 1.25rem);
+    @include flex(column, stretch, flex-start, 1.5rem);
 
-    @include from('md') {
+    @include from('lg') {
       flex-direction: row;
       align-items: flex-start;
-      gap: 2.5rem;
+      gap: 3.5rem;
     }
   }
 
+  // Galería fija en escritorio: la foto acompaña mientras se elige la oferta.
   &__gallery {
+    min-width: 0;
+
     @include from('md') {
+      width: 100%;
+      max-width: 620px;
+      align-self: center;
+    }
+
+    @include from('lg') {
       flex: 1.1;
+      max-width: none;
+      align-self: flex-start;
       position: sticky;
-      top: 5rem;
+      top: 6rem;
     }
   }
 
   &__buy {
-    @include flex(column, stretch, flex-start, 1.25rem);
+    @include flex(column, stretch, flex-start, 1.6rem);
 
     @include from('md') {
+      width: 100%;
+      max-width: 620px;
+      align-self: center;
+    }
+
+    @include from('lg') {
       flex: 1;
-      max-width: 520px;
+      max-width: 500px;
+      align-self: flex-start;
+    }
+  }
+
+  // Entrada orquestada de la columna de compra: un solo momento, escalonado.
+  &__step {
+    animation: rise $dur-slow $ease-out both;
+
+    @for $i from 1 through 4 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{80 + ($i - 1) * 70}ms;
+      }
     }
   }
 
   &__qty {
     @include flex(row, center, space-between, 1rem);
-    font-weight: 600;
-    font-size: $text-sm;
+
+    span {
+      @include eyebrow;
+      color: $ink-soft;
+    }
   }
 
   &__more {
     @include flex(column, stretch, flex-start, 2.5rem);
-    margin-top: $space-lg;
+    margin-top: $space-xl;
 
     @include from('lg') {
       flex-direction: row;
       align-items: flex-start;
+      gap: 3.5rem;
     }
   }
 
@@ -155,6 +211,11 @@ const { visible: stickyVisible } = useStickyCta(ctaEl)
   &__payments {
     flex: 1;
     min-width: 0;
+
+    @include from('lg') {
+      position: sticky;
+      top: 6rem;
+    }
   }
 
   &__related {
