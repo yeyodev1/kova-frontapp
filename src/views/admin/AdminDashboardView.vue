@@ -27,10 +27,10 @@ const byStatus = computed(() => {
 
 const shortcuts = [
   { to: '/admin/pedidos?status=transfer_review', label: 'Revisar transferencias', icon: 'fa-solid fa-building-columns' },
+  { to: '/admin/productos?nuevo=1', label: 'Crear producto', icon: 'fa-solid fa-plus' },
   { to: '/admin/pedidos', label: 'Ver pedidos', icon: 'fa-solid fa-receipt' },
-  { to: '/admin/dropi', label: 'Importar de Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
   { to: '/admin/carritos', label: 'Recuperar carritos', icon: 'fa-brands fa-whatsapp' },
-  { to: '/admin/productos', label: 'Productos', icon: 'fa-solid fa-box' },
+  { to: '/admin/dropi', label: 'Importar de Dropi', icon: 'fa-solid fa-cloud-arrow-down' },
   { to: '/admin/ajustes', label: 'Ajustes', icon: 'fa-solid fa-sliders' },
 ]
 </script>
@@ -49,9 +49,11 @@ const shortcuts = [
 
     <template v-else-if="stats">
       <div class="dash__stats">
-        <AdminStatCard label="Pedidos hoy" :value="stats.ordersToday" icon="fa-solid fa-receipt" />
-        <AdminStatCard label="Ventas hoy" :value="formatCents(stats.revenueToday)" icon="fa-solid fa-dollar-sign" tone="success" />
+        <AdminStatCard class="dash__stat" style="--i: 0" label="Pedidos hoy" :value="stats.ordersToday" icon="fa-solid fa-receipt" />
+        <AdminStatCard class="dash__stat" style="--i: 1" label="Ventas hoy" :value="formatCents(stats.revenueToday)" icon="fa-solid fa-dollar-sign" tone="success" />
         <AdminStatCard
+          class="dash__stat"
+          style="--i: 2"
           label="Transferencias por revisar"
           :value="stats.pendingTransfers"
           icon="fa-solid fa-building-columns"
@@ -59,6 +61,8 @@ const shortcuts = [
           to="/admin/pedidos?status=transfer_review"
         />
         <AdminStatCard
+          class="dash__stat"
+          style="--i: 3"
           label="Errores de Dropi"
           :value="stats.dropiErrors"
           icon="fa-solid fa-triangle-exclamation"
@@ -89,8 +93,9 @@ const shortcuts = [
       <AdminPanel title="Accesos rápidos" icon="fa-solid fa-bolt">
         <div class="dash__shortcuts">
           <RouterLink v-for="s in shortcuts" :key="s.to" :to="s.to" class="dash__shortcut">
-            <i :class="s.icon"></i>
+            <span class="dash__shortcut-icon"><i :class="s.icon"></i></span>
             <span>{{ s.label }}</span>
+            <i class="fa-solid fa-chevron-right dash__shortcut-go" aria-hidden="true"></i>
           </RouterLink>
         </div>
       </AdminPanel>
@@ -103,11 +108,16 @@ const shortcuts = [
   @include flex(column, stretch, flex-start, 1rem);
 
   &__stats {
-    @include flex-cards(140px, 0.7rem);
+    @include flex-cards(150px, 0.7rem);
 
     @include from('lg') {
       @include flex-cards(200px, 1rem);
     }
+  }
+
+  &__stat {
+    animation: rise $dur-slow $ease-out both;
+    animation-delay: calc(var(--i) * 70ms);
   }
 
   &__row {
@@ -136,35 +146,75 @@ const shortcuts = [
 
   &__list {
     list-style: none;
-    @include flex(column, stretch, flex-start, 0.15rem);
+    @include flex(column, stretch, flex-start);
   }
 
   &__list-link {
     @include flex(row, center, space-between, 0.5rem);
-    padding: 0.5rem 0.3rem;
+    padding: 0.6rem 0.2rem;
     border-bottom: 1px solid $paper;
     font-size: $text-sm;
+
+    strong {
+      @include price(1rem, 750);
+    }
   }
 
   &__shortcuts {
-    @include flex-cards(140px, 0.6rem);
+    @include flex-cards(150px, 0.5rem);
+
+    @include from('lg') {
+      @include flex-cards(260px, 0.6rem);
+    }
   }
 
   &__shortcut {
-    @include flex(row, center, flex-start, 0.6rem);
-    padding: 0.8rem 0.9rem;
-    border-radius: $radius-sm;
-    background: $paper;
+    @include flex(row, center, flex-start, 0.75rem);
+    padding: 0.55rem 0.8rem 0.55rem 0.55rem;
+    border-radius: 14px;
+    border: 1px solid $line;
+    background: $surface;
     font-size: $text-sm;
-    font-weight: 500;
-    @include transition(background);
-
-    i {
-      color: $accent;
-    }
+    font-weight: 600;
+    transition:
+      border-color $dur $ease-out,
+      transform $dur-fast $ease-out;
 
     &:hover {
-      background: $accent-soft;
+      border-color: $alu-dark;
+
+      .dash__shortcut-go {
+        transform: translateX(3px);
+        color: $accent;
+      }
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  &__shortcut-icon {
+    @include plinth(11px);
+    @include flex(row, center, center);
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    color: $accent-deep;
+  }
+
+  &__shortcut-go {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: $alu-dark;
+    transition:
+      transform $dur $ease-out,
+      color $dur $ease-out;
+  }
+
+  @include reduced-motion {
+    &__stat {
+      animation: none;
     }
   }
 }
