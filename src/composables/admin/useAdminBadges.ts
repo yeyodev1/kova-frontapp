@@ -28,6 +28,10 @@ async function refresh() {
 }
 
 export function useAdminBadges() {
-  const ordersBadge = computed(() => (stats.value ? stats.value.pendingTransfers + stats.value.dropiErrors : 0))
+  // Lo que el equipo tiene que mover; sin `todoCount` (API anterior) cae a la suma de antes.
+  const ordersBadge = computed(() => {
+    if (!stats.value) return 0
+    return stats.value.todoCount ?? stats.value.pendingTransfers + stats.value.dropiErrors
+  })
   return { stats, loading, error, refresh, ordersBadge }
 }
