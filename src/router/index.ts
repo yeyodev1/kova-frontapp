@@ -152,6 +152,18 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Carritos abandonados' },
       },
       {
+        path: 'pagos',
+        name: 'AdminPayments',
+        component: () => import('@/views/admin/AdminPaymentsView.vue'),
+        meta: { title: 'Pagos y bancos' },
+      },
+      {
+        path: 'incidencias',
+        name: 'AdminIncidents',
+        component: () => import('@/views/admin/AdminIncidentsView.vue'),
+        meta: { title: 'Incidencias' },
+      },
+      {
         path: 'ajustes',
         name: 'AdminSettings',
         component: () => import('@/views/admin/AdminSettingsView.vue'),
