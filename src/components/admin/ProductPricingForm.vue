@@ -27,7 +27,7 @@ function variantMargin(price: number) {
 
       <div class="price__margin" :class="`price__margin--${marginTone(margin)}`">
         <div>
-          <span class="price__k">Costo Dropi</span>
+          <span class="price__k">Costo proveedor</span>
           <strong>{{ cost ? formatCents(cost) : 'Sin dato' }}</strong>
         </div>
         <div v-if="suggested">
@@ -43,7 +43,7 @@ function variantMargin(price: number) {
 
       <p v-if="belowCost" class="price__warn">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Hay precios por debajo del costo de Dropi: venderías con pérdida.
+        Hay precios por debajo del costo del proveedor: venderías con pérdida.
       </p>
 
       <template v-if="form.variants.length">
