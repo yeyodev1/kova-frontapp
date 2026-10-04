@@ -49,6 +49,13 @@ const routes: Array<RouteRecordRaw> = [
     redirect: (to) => ({ path: '/pay-response', query: to.query }),
   },
   {
+    // Link de pago que manda el bot de WhatsApp: abre la Cajita de Payphone para ese pedido.
+    path: '/pagar/:token',
+    name: 'PayOrder',
+    component: () => import('@/views/PayOrderView.vue'),
+    meta: { title: 'Pagar pedido', hideChrome: true },
+  },
+  {
     path: '/rastrear',
     name: 'Track',
     component: () => import('@/views/TrackOrderView.vue'),
@@ -119,6 +126,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'AdminDropi',
         component: () => import('@/views/admin/AdminDropiView.vue'),
         meta: { title: 'Importar de Dropi' },
+      },
+      {
+        path: 'bot',
+        name: 'AdminBot',
+        component: () => import('@/views/admin/AdminBotView.vue'),
+        meta: { title: 'Bot de WhatsApp' },
       },
       {
         path: 'carritos',
