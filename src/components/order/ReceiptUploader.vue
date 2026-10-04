@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { orderCopy } from '@/config/site'
 import { storeService } from '@/services/store.service'
 import { useToastStore } from '@/stores/toast'
+import ReceiptDropzone from './ReceiptDropzone.vue'
 import type { ApiError, Order } from '@/types'
 
 const props = defineProps<{ number: string; phone: string }>()
@@ -11,11 +12,9 @@ const emit = defineEmits<{ uploaded: [order: Order] }>()
 const toast = useToastStore()
 const file = ref<File | null>(null)
 const preview = ref('')
-const dragging = ref(false)
 const uploading = ref(false)
 const done = ref(false)
 const error = ref('')
-const input = ref<HTMLInputElement | null>(null)
 
 const isImage = computed(() => !!file.value?.type.startsWith('image/'))
 const sizeLabel = computed(() => (file.value ? `${(file.value.size / 1024 / 1024).toFixed(1)} MB` : ''))
@@ -38,13 +37,9 @@ function pick(candidate: File | undefined | null) {
 }
 
 function onChange(event: Event) {
-  pick((event.target as HTMLInputElement).files?.[0])
-  if (input.value) input.value.value = ''
-}
-
-function onDrop(event: DragEvent) {
-  dragging.value = false
-  pick(event.dataTransfer?.files?.[0])
+  const target = event.target as HTMLInputElement
+  pick(target.files?.[0])
+  target.value = ''
 }
 
 async function send() {
@@ -79,20 +74,7 @@ onBeforeUnmount(clearPreview)
         <p class="up__text">{{ orderCopy.uploadText }}</p>
       </div>
 
-      <label
-        v-if="!file"
-        class="up__drop"
-        :class="{ 'up__drop--over': dragging }"
-        @dragenter.prevent="dragging = true"
-        @dragover.prevent="dragging = true"
-        @dragleave.prevent="dragging = false"
-        @drop.prevent="onDrop"
-      >
-        <span class="up__icon" aria-hidden="true"><i class="fa-solid fa-cloud-arrow-up"></i></span>
-        <span class="up__drop-text">{{ dragging ? orderCopy.uploadDropActive : orderCopy.uploadDrop }}</span>
-        <span class="up__drop-cta">{{ orderCopy.uploadCta }}</span>
-        <input ref="input" type="file" accept="image/*,application/pdf" class="visually-hidden" @change="onChange" />
-      </label>
+      <ReceiptDropzone v-if="!file" @pick="pick" />
 
       <div v-else class="up__file" :aria-busy="uploading">
         <span class="up__thumb">
@@ -136,65 +118,6 @@ onBeforeUnmount(clearPreview)
     font-size: $text-sm;
     color: $ink-soft;
     margin-top: 0.2rem;
-  }
-
-  &__drop {
-    @include flex(column, center, center, 0.45rem);
-    margin: 0;
-    padding: 1.5rem 1rem;
-    border: 1.5px dashed $alu-dark;
-    border-radius: 16px;
-    background: $alu-light;
-    text-align: center;
-    cursor: pointer;
-    transition:
-      border-color $dur ease,
-      background-color $dur ease,
-      transform $dur-fast $ease-out;
-
-    &:active {
-      transform: scale(0.99);
-    }
-
-    &:has(input:focus-visible) {
-      outline: 2px solid $accent;
-      outline-offset: 3px;
-    }
-
-    &--over {
-      border-color: $accent;
-      background: $accent-soft;
-    }
-  }
-
-  &__icon {
-    @include plinth(50%);
-    @include flex(row, center, center);
-    width: 3rem;
-    height: 3rem;
-    color: $accent-deep;
-    font-size: 1.15rem;
-    transition: transform $dur $ease-spring;
-  }
-
-  &__drop--over &__icon {
-    transform: translateY(-4px) scale(1.06);
-  }
-
-  &__drop-text {
-    font-size: $text-sm;
-    color: $ink-soft;
-    max-width: 26ch;
-  }
-
-  &__drop-cta {
-    margin-top: 0.2rem;
-    padding: 0.55rem 1.1rem;
-    border-radius: $radius-pill;
-    background: $accent-deep;
-    color: $surface;
-    font-size: $text-sm;
-    font-weight: 700;
   }
 
   &__file {
