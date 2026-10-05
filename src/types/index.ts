@@ -248,6 +248,8 @@ export interface CreateOrderPayload {
   utm?: Record<string, string>
   /** _id de la cuenta elegida para transferir. */
   transferBank?: string
+  /** Cookies del píxel para la API de Conversiones de Meta. */
+  tracking?: { fbp: string; fbc: string; sourceUrl: string }
 }
 
 export interface CreateOrderResponse {

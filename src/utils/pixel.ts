@@ -29,9 +29,24 @@ export function initPixel(): void {
   fbq('init', PIXEL_ID)
 }
 
-export function track(event: string, data?: Record<string, unknown>): void {
+/** eventID: el mismo id que manda el servidor por la API de Conversiones, para no contar doble. */
+export function track(event: string, data?: Record<string, unknown>, eventID?: string): void {
   if (!PIXEL_ID || !window.fbq) return
-  window.fbq('track', event, data)
+  if (eventID) window.fbq('track', event, data, { eventID })
+  else window.fbq('track', event, data)
+}
+
+function cookie(name: string): string {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+  return match ? decodeURIComponent(match[1] ?? '') : ''
+}
+
+/**
+ * Cookies del píxel y la página de origen: el backend las reenvía a Meta con la compra
+ * para que la atribuya al clic del anuncio aunque el navegador bloquee el píxel.
+ */
+export function pixelTracking(): { fbp: string; fbc: string; sourceUrl: string } {
+  return { fbp: cookie('_fbp'), fbc: cookie('_fbc'), sourceUrl: window.location.href }
 }
 
 export function pageView(): void {

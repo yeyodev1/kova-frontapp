@@ -15,12 +15,16 @@ export function trackPurchase(order: Order): void {
   } catch {
     /* modo privado: mejor un posible duplicado que perder el evento */
   }
-  track('Purchase', {
-    value: order.total / 100,
-    currency: 'USD',
-    content_ids: order.items.map((item) => item.product),
-    content_type: 'product',
-    num_items: order.items.reduce((sum, item) => sum + item.quantity, 0),
-    order_id: order.number,
-  })
+  track(
+    'Purchase',
+    {
+      value: order.total / 100,
+      currency: 'USD',
+      content_ids: order.items.map((item) => item.product),
+      content_type: 'product',
+      num_items: order.items.reduce((sum, item) => sum + item.quantity, 0),
+      order_id: order.number,
+    },
+    order.number,
+  )
 }
