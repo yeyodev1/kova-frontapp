@@ -15,7 +15,7 @@ const cart = useCartStore()
 const route = useRoute()
 const router = useRouter()
 const open = toRef(cart, 'isOpen')
-const method = ref<PaymentMethod>('card')
+const method = ref<PaymentMethod>('cod')
 const { quote, loading, itemFor } = useQuote(method, open)
 
 useBodyScroll(open)

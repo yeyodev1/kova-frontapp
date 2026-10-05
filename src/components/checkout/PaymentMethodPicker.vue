@@ -12,10 +12,10 @@ const emit = defineEmits<{ 'update:modelValue': [value: PaymentMethod] }>()
 const bank = defineModel<string>('bank', { default: '' })
 
 const { acceptTransfers, bankAccounts } = useStoreSettings()
-// Tarjeta primero: es el precio más bajo y el que más le conviene al cliente.
+// Contra entrega primero: el cliente de anuncios confía más en pagar al recibir.
 // Transferencia solo si el panel la tiene encendida (y el quote no dice lo contrario).
 const order = computed<PaymentMethod[]>(() =>
-  (['card', 'transfer', 'cod'] as PaymentMethod[]).filter(
+  (['cod', 'card', 'transfer'] as PaymentMethod[]).filter(
     (method) => method !== 'transfer' || (acceptTransfers.value && props.quote?.available?.transfer !== false),
   ),
 )
@@ -31,7 +31,7 @@ const m = checkoutCopy.methods
         class="pm__option"
         :class="[`pm__option--${method}`, { 'pm__option--active': modelValue === method }]"
       >
-        <span v-if="method === 'card'" class="pm__tab">{{ m.card.badge }}</span>
+        <span v-if="method === 'cod'" class="pm__tab">{{ m.cod.badge }}</span>
         <input
           type="radio"
           name="payment-method"
@@ -48,7 +48,6 @@ const m = checkoutCopy.methods
           <span class="pm__desc">{{ m[method].text }}</span>
           <span class="pm__logos" aria-hidden="true">
             <i v-for="logo in m[method].logos" :key="logo" :class="logo"></i>
-            <em v-if="method === 'cod'" class="pm__chip">{{ m.cod.badge }}</em>
           </span>
         </span>
         <span class="pm__price">
@@ -96,7 +95,7 @@ const m = checkoutCopy.methods
       outline-offset: 3px;
     }
 
-    &--card {
+    &--cod {
       margin-top: 0.85rem;
     }
 

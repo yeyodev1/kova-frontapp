@@ -75,22 +75,22 @@ export const trustSeals = [
 
 export const paymentMethodsInfo = {
   title: 'Paga como prefieras',
-  text: 'Con tarjeta pagas el precio más bajo. Contra entrega y transferencia tienen un pequeño recargo que ves claramente en el checkout antes de confirmar.',
+  text: 'Mismo precio con cualquier método, sin recargos. Si prefieres, pagas en efectivo cuando te llega.',
   items: [
     {
       icon: 'fa-solid fa-credit-card',
       title: 'Tarjeta de crédito o débito',
-      text: 'Visa y Mastercard, procesado por Payphone. Precio más bajo.',
+      text: 'Visa y Mastercard, procesado por Payphone.',
     },
     {
       icon: 'fa-solid fa-building-columns',
       title: 'Transferencia bancaria',
-      text: 'Transfieres y nos envías el comprobante. Pequeño recargo.',
+      text: 'Transfieres y nos envías el comprobante.',
     },
     {
       icon: 'fa-solid fa-hand-holding-dollar',
       title: 'Contra entrega',
-      text: 'Pagas en efectivo al recibir. Pequeño recargo.',
+      text: 'Pagas en efectivo al recibir, sin recargo.',
     },
   ],
 }
@@ -179,7 +179,7 @@ export const generalFaqs = [
   {
     question: '¿Puedo pagar cuando me llegue el producto?',
     answer:
-      'Sí, tenemos pago contra entrega. Pagas en efectivo al recibir tu pedido. Este método tiene un pequeño recargo que ves en el checkout antes de confirmar.',
+      'Sí, tenemos pago contra entrega. Pagas en efectivo al recibir tu pedido, sin recargo: el precio es el mismo que con tarjeta.',
   },
   {
     question: '¿Es seguro pagar con tarjeta?',
@@ -358,7 +358,7 @@ export const checkoutCopy = {
       icon: 'fa-solid fa-credit-card',
       title: 'Tarjeta',
       text: 'Crédito o débito, procesado por Payphone.',
-      badge: 'Precio más bajo',
+      badge: '',
       logos: ['fa-brands fa-cc-visa', 'fa-brands fa-cc-mastercard', 'fa-brands fa-cc-diners-club'],
     },
     transfer: {
@@ -811,7 +811,7 @@ export const policies: Policy[] = [
         heading: 'Precios y pagos',
         body: [
           'Los precios están en dólares estadounidenses (USD). El precio final, incluidos envío y recargos por método de pago, se muestra en el checkout antes de confirmar.',
-          'Los pagos contra entrega y por transferencia tienen un recargo que cubre su costo operativo. El pago con tarjeta no tiene recargo.',
+          'El precio es el mismo con tarjeta, transferencia o contra entrega: no cobramos recargo por método de pago.',
         ],
       },
       {

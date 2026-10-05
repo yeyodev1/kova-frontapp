@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useToastStore } from '@/stores/toast'
 import { storeService } from '@/services/store.service'
-import { track } from '@/utils/pixel'
+import { pixelTracking, track } from '@/utils/pixel'
 import { checkoutCopy } from '@/config/site'
 import { useStoreSettings } from './useStoreSettings'
 import { useCheckoutForm } from './useCheckoutForm'
@@ -25,13 +25,13 @@ export function useCheckout() {
   const { form, errors, validateField, liveValidate, isValid, validate, contactDone, addressDone, normalizedPhone, phoneIsValid } =
     useCheckoutForm()
   const locations = useLocations()
-  const method = ref<PaymentMethod>('card')
+  const method = ref<PaymentMethod>('cod')
   // _id de la cuenta elegida: solo cuenta con transferencia y más de una cuenta activa.
   const transferBank = ref('')
   const { acceptTransfers } = useStoreSettings()
-  // Si el panel apaga las transferencias mientras compra, vuelve a tarjeta.
+  // Si el panel apaga las transferencias mientras compra, vuelve a contra entrega.
   watch(acceptTransfers, (on) => {
-    if (!on && method.value === 'transfer') method.value = 'card'
+    if (!on && method.value === 'transfer') method.value = 'cod'
   })
   const { quote, loading: quoting, error: quoteError } = useQuote(method)
 
@@ -132,6 +132,7 @@ export function useCheckout() {
         },
         address: buildAddress(),
         utm: getUtm(),
+        tracking: pixelTracking(),
         transferBank: method.value === 'transfer' && transferBank.value ? transferBank.value : undefined,
       })
 
